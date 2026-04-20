@@ -3,470 +3,289 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Portafolio Académico – Estadística Espacial | UNA Puno</title>
-  <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@400;600;700&family=Source+Sans+3:wght@300;400;600&display=swap" rel="stylesheet"/>
+  <title>Terminal Académica – Estadística Espacial</title>
+  <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@300;400;700&display=swap" rel="stylesheet"/>
+  <link rel="icon" href="https://res.cloudinary.com/dyrqu5qjz/image/upload/v1776689763/unap1_zr1qx5.ico" type="image/x-icon">
   <style>
     :root {
-      --azul:#1a3a5c;--azul-med:#245a8a;--azul-claro:#3a7fc1;
-      --gris-osc:#3d4550;--gris-med:#6b7280;--gris-borde:#d1d9e0;
-      --blanco:#ffffff;--fondo:#f4f6f9;--acento:#c8973f;
-      --rojo:#b91c1c;--verde:#15803d;--morado:#6d28d9;--naranja:#c2410c;
+      --neon: #00ff41;
+      --neon-dim: #003b11;
+      --bg: #0a0a0a;
+      --text: #d0d0d0;
     }
-    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-    body{font-family:'Source Sans 3',sans-serif;background:var(--fondo);color:var(--gris-osc);line-height:1.6;}
-    .header-top{background:var(--azul);padding:12px 20px;display:flex;align-items:center;justify-content:space-between;gap:14px;}
-    .logo-wrap{width:72px;height:72px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.10);border-radius:8px;padding:5px;}
-    .logo-wrap img{width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 2px 6px rgba(0,0,0,.4));}
-    .header-center{text-align:center;color:#fff;flex:1;}
-    .header-center .univ-lbl{font-size:10px;letter-spacing:1.4px;text-transform:uppercase;color:rgba(255,255,255,.65);margin-bottom:4px;}
-    .header-center .curso-nm{font-family:'Source Serif 4',serif;font-size:19px;font-weight:700;line-height:1.2;}
-    .header-center .carrera-lbl{font-size:11px;color:rgba(255,255,255,.58);margin-top:4px;}
-    .header-sub{background:var(--azul-med);padding:7px 20px;display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:2px 18px;}
-    .header-sub span{font-size:11.5px;color:rgba(255,255,255,.88);}
-    .header-sub strong{color:#fff;}
-    .hero{background:linear-gradient(135deg,var(--azul) 0%,var(--azul-claro) 100%);color:#fff;text-align:center;padding:36px 20px 30px;border-bottom:4px solid var(--acento);}
-    .hero h1{font-family:'Source Serif 4',serif;font-size:24px;font-weight:700;margin-bottom:10px;display:flex;align-items:center;justify-content:center;gap:10px;}
-    .hero p{font-size:14px;max-width:660px;margin:0 auto;color:rgba(255,255,255,.84);line-height:1.65;}
-    nav{background:var(--blanco);border-bottom:1px solid var(--gris-borde);display:flex;justify-content:center;gap:4px;padding:8px 16px;flex-wrap:wrap;position:sticky;top:0;z-index:50;box-shadow:0 2px 6px rgba(0,0,0,.07);}
-    nav a{padding:6px 16px;border-radius:4px;font-size:13px;font-weight:600;text-decoration:none;color:var(--azul);transition:background .18s,color .18s;}
-    nav a:hover{background:var(--azul);color:#fff;}
-    main{max-width:980px;margin:0 auto;padding:30px 16px 60px;}
-    .sec-titulo{font-family:'Source Serif 4',serif;font-size:19px;font-weight:700;color:var(--azul);margin-bottom:10px;padding-bottom:8px;border-bottom:2px solid var(--azul-claro);}
-    .presentacion{background:var(--blanco);border:1px solid var(--gris-borde);border-left:4px solid var(--azul-claro);border-radius:6px;padding:20px 24px;margin-bottom:36px;font-size:14px;line-height:1.75;}
-    .unidad{margin-bottom:44px;}
-    .unidad-header{background:var(--azul);color:#fff;padding:12px 20px;border-radius:6px 6px 0 0;display:flex;align-items:center;gap:12px;}
-    .unidad-header .badge{background:var(--acento);color:#fff;font-size:11px;font-weight:700;padding:3px 12px;border-radius:20px;text-transform:uppercase;letter-spacing:.8px;flex-shrink:0;}
-    .unidad-header h2{font-family:'Source Serif 4',serif;font-size:15px;font-weight:700;}
-    .tareas-lista{background:var(--blanco);border:1px solid var(--gris-borde);border-top:none;border-radius:0 0 6px 6px;overflow:hidden;}
-    .tarea{display:grid;grid-template-columns:44px 1fr auto;align-items:center;gap:14px;padding:15px 18px;border-bottom:1px solid var(--gris-borde);transition:background .15s;}
-    .tarea:last-child{border-bottom:none;}
-    .tarea:hover{background:#f0f5fb;}
-    .t-num{width:40px;height:40px;background:var(--fondo);border:2px solid var(--azul-claro);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13.5px;color:var(--azul);flex-shrink:0;}
-    .t-info h3{font-size:13.5px;font-weight:700;color:var(--azul);margin-bottom:2px;line-height:1.3;}
-    .t-info .t-desc{font-size:12px;color:var(--gris-med);line-height:1.4;}
-    .t-files{display:flex;gap:5px;margin-top:5px;flex-wrap:wrap;}
-    .file-chip{display:inline-flex;align-items:center;gap:4px;background:var(--fondo);border:1px solid var(--gris-borde);border-radius:4px;padding:2px 8px;font-size:11px;color:var(--gris-med);font-family:'Courier New',monospace;}
-    .file-chip.disponible{border-color:#15803d;color:#15803d;background:#f0fdf4;}
-    .file-chip.pendiente{border-color:#d97706;color:#92400e;background:#fffbeb;}
-    .t-btns{display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end;}
-    .btn{display:inline-flex;align-items:center;gap:6px;padding:7px 13px;border-radius:5px;font-size:12px;font-weight:600;cursor:pointer;border:none;text-decoration:none;white-space:nowrap;transition:opacity .15s,transform .1s;font-family:inherit;}
-    .btn svg{width:15px;height:15px;flex-shrink:0;}
-    .btn:hover:not(:disabled){opacity:.83;transform:translateY(-1px);}
-    .btn-pdf{background:var(--rojo);color:#fff;}
-    .btn-r{background:#276dc3;color:#fff;}
-    .btn-py{background:#306998;color:#fff;}
-    .btn-rmd{background:var(--morado);color:#fff;}
-    .btn-qmd{background:#4f7942;color:#fff;}
-    .btn-html{background:var(--naranja);color:#fff;}
-    .btn-gen{background:var(--verde);color:#fff;}
-    .btn:disabled,.btn.disabled{background:#d1d5db!important;color:#9ca3af!important;cursor:not-allowed;transform:none!important;opacity:1!important;}
-    footer{background:var(--azul);color:rgba(255,255,255,.72);text-align:center;padding:20px;font-size:12.5px;line-height:1.85;}
-    footer strong{color:#fff;}
-    footer .ac{color:var(--acento);font-weight:600;}
-    .overlay{display:none;position:fixed;inset:0;background:rgba(8,18,38,.78);z-index:200;align-items:center;justify-content:center;padding:12px;}
-    .overlay.open{display:flex;}
-    .modal{background:#fff;border-radius:8px;max-width:940px;width:100%;max-height:92vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 24px 64px rgba(0,0,0,.45);animation:mIn .2s ease;}
-    @keyframes mIn{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
-    .m-head{background:var(--azul);color:#fff;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-shrink:0;}
-    .m-head-left{display:flex;align-items:center;gap:9px;flex:1;min-width:0;}
-    .m-badge{font-size:10px;background:rgba(255,255,255,.18);padding:2px 10px;border-radius:20px;letter-spacing:.8px;text-transform:uppercase;font-weight:700;flex-shrink:0;white-space:nowrap;}
-    .m-titulo{font-size:14px;font-weight:700;font-family:'Source Serif 4',serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-    .m-close{background:rgba(255,255,255,.15);border:none;color:#fff;width:28px;height:28px;border-radius:50%;font-size:15px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:background .15s;}
-    .m-close:hover{background:rgba(255,255,255,.3);}
-    .m-bar{padding:8px 14px;background:#f4f6f9;border-bottom:1px solid var(--gris-borde);display:flex;gap:7px;align-items:center;flex-wrap:wrap;flex-shrink:0;}
-    .m-bar .btn{font-size:11.5px;padding:6px 12px;}
-    .btn-gh{background:#24292e;color:#fff;}
-    .btn-dl{background:var(--azul-med);color:#fff;}
-    .btn-cx{background:#e5e7eb;color:var(--gris-osc);}
-    .m-ruta{font-size:10.5px;color:var(--gris-med);margin-left:auto;font-family:'Courier New',monospace;}
-    .m-body{flex:1;overflow:auto;background:#1e1e2e;}
-    .m-body iframe{width:100%;min-height:560px;border:none;display:block;}
-    .code-pre{padding:20px 22px;font-family:'Courier New',monospace;font-size:12.5px;color:#cdd6f4;background:#1e1e2e;white-space:pre-wrap;word-break:break-word;min-height:500px;tab-size:2;margin:0;}
-    .m-nota{background:#2a2a3e;border-left:3px solid var(--azul-claro);padding:12px 18px;margin:14px 18px;border-radius:0 4px 4px 0;color:#cdd6f4;font-size:13px;line-height:1.6;font-family:'Source Sans 3',sans-serif;}
-    .spin{width:15px;height:15px;border-radius:50%;border:2px solid #444;border-top-color:var(--azul-claro);display:inline-block;animation:sp .8s linear infinite;vertical-align:middle;margin-right:8px;}
-    @keyframes sp{to{transform:rotate(360deg)}}
-    @media(max-width:600px){
-      .logo-wrap{width:52px;height:52px;}
-      .header-center .curso-nm{font-size:14.5px;}
-      .header-center .carrera-lbl{display:none;}
-      .hero h1{font-size:18px;}
-      nav a{padding:5px 10px;font-size:12px;}
-      main{padding:20px 12px 50px;}
-      .tarea{grid-template-columns:36px 1fr;padding:12px 13px;}
-      .t-btns{grid-column:1/-1;justify-content:flex-start;margin-top:6px;}
+
+    * { 
+      box-sizing: border-box; 
+      margin: 0; padding: 0; 
+      scrollbar-width: none; 
     }
+    *::-webkit-scrollbar { display: none; }
+
+    body { 
+      background: var(--bg); 
+      color: var(--text); 
+      font-family: 'Source Code Pro', monospace; 
+      overflow: hidden; 
+    }
+
+    #matrixCanvas { position: fixed; top: 0; left: 0; z-index: 5; transition: opacity 1.5s ease, filter 1.5s ease; }
+    #matrixCanvas.authorized { opacity: 0.25; filter: blur(2px); }
+
+    #terminal-overlay {
+      position: fixed; inset: 0; z-index: 10000;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(10, 10, 10, 0.4);
+    }
+    .terminal-box {
+      width: 90%; max-width: 650px; padding: 40px;
+      border: 1px solid var(--neon); background: rgba(0, 5, 0, 0.95);
+      box-shadow: 0 0 50px rgba(0, 255, 65, 0.2);
+    }
+    #typing-text { color: var(--neon); font-size: 0.9rem; line-height: 1.8; min-height: 140px; white-space: pre-wrap; }
+    .loader-container { width: 100%; background: #001a00; height: 6px; border: 1px solid var(--neon-dim); margin-top: 25px; }
+    .loader-bar { width: 0%; height: 100%; background: var(--neon); box-shadow: 0 0 10px var(--neon); }
+
+    #portafolio-wrapper { 
+      display: none; opacity: 0; transition: opacity 0.8s ease; 
+      position: relative; z-index: 20; padding: 40px 20px; 
+      max-width: 1100px; margin: 0 auto; height: 100vh; overflow-y: auto; 
+    }
+    
+    header { 
+      border: 1px solid var(--neon-dim); padding: 35px; margin-bottom: 40px; 
+      background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(10px); 
+      border-left: 5px solid var(--neon);
+    }
+    
+    .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+    .logo-img { height: 80px; object-fit: contain; }
+
+    .sys-title { color: var(--neon); font-weight: bold; border-bottom: 1px solid var(--neon-dim); padding-bottom: 10px; margin-bottom: 15px; font-size: 1.3rem; letter-spacing: 2px; }
+    .sys-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; font-size: 0.9rem; }
+    .hero-desc { color: var(--neon); font-size: 0.9rem; margin-top: 20px; opacity: 0.8; line-height: 1.6; border-left: 2px solid var(--neon); padding-left: 15px; }
+
+    .filter-nav { display: flex; gap: 15px; margin: 30px 0 40px; }
+    .filter-btn { background: transparent; border: 1px solid var(--neon-dim); color: var(--neon-dim); padding: 10px 20px; cursor: pointer; font-family: inherit; font-size: 0.85rem; transition: 0.3s; }
+    .filter-btn.active { border-color: var(--neon); color: var(--neon); background: rgba(0,255,65,0.1); }
+
+    /* Tarjetas de Tareas */
+    .tarea-card { 
+      background: rgba(15, 15, 15, 0.95); border: 1px solid #222; padding: 30px; 
+      margin-bottom: 25px; display: grid; grid-template-columns: 60px 1fr 220px; 
+      gap: 25px; align-items: start; transition: 0.3s;
+    }
+    .tarea-card:hover { border-color: var(--neon); background: rgba(0, 40, 0, 0.8); }
+    
+    .t-num { font-size: 2rem; font-weight: bold; color: var(--neon); opacity: 0.3; line-height: 1; }
+    .t-info strong { color: var(--neon); display: block; margin-bottom: 10px; font-size: 1.1rem; }
+    .t-info p { font-size: 0.9rem; color: #999; line-height: 1.6; margin-bottom: 15px; }
+    
+    /* Estado debajo de la descripción */
+    .t-status-inline { 
+        display: inline-flex; align-items: center; gap: 8px; font-size: 0.75rem; 
+        font-weight: bold; letter-spacing: 1px; padding: 4px 12px; border: 1px solid;
+    }
+    .status-ok { border-color: var(--neon); color: var(--neon); background: rgba(0,255,65,0.05); }
+    .status-pending { border-color: #444; color: #666; }
+
+    .t-actions { display: flex; flex-direction: column; gap: 12px; }
+    .btn-sys { 
+      background: transparent; border: 1px solid var(--neon); color: var(--neon); 
+      padding: 12px; cursor: pointer; font-size: 0.7rem; text-align: center;
+      text-decoration: none; font-family: inherit; transition: 0.3s;
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+      text-transform: uppercase; letter-spacing: 1px;
+    }
+    .btn-sys svg { width: 14px; height: 14px; fill: currentColor; }
+    .btn-sys:hover { background: var(--neon); color: #000; }
+    .btn-sys:disabled { border-color: #333; color: #333; cursor: not-allowed; }
+
+    /* Modal Visor */
+    .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.97); z-index: 50000; padding: 25px; }
+    .overlay.open { display: flex; align-items: center; justify-content: center; }
+    .modal { background: #000; border: 1px solid var(--neon); width: 100%; max-width: 1200px; height: 94vh; display: flex; flex-direction: column; }
+    .m-bar-top { background: var(--neon); color: #000; padding: 12px 20px; display: flex; justify-content: space-between; font-weight: bold; }
+    .m-bar-sub { background: #111; padding: 12px; display: flex; gap: 15px; border-bottom: 1px solid #222; }
+    .m-btn { color: #fff; text-decoration: none; font-size: 11px; border: 1px solid #333; padding: 8px 16px; background: #222; cursor: pointer; }
+    
+    #mBody { flex:1; background:#000; overflow: hidden; }
+    .pdf-frame { width: 100%; height: 100%; border: none; display: block; }
+    .dark-pdf { filter: invert(0.9) hue-rotate(180deg) contrast(1.1); }
   </style>
 </head>
 <body>
 
-<header>
-  <div class="header-top">
-    <div class="logo-wrap">
-      <img src="https://res.cloudinary.com/dyrqu5qjz/image/upload/v1776660144/unap1_icjzhk.ico" alt="Logo UNA Puno"/>
-    </div>
-    <div class="header-center">
-      <div class="univ-lbl">Universidad Nacional del Altiplano – Puno</div>
-      <div class="curso-nm">Estadística Espacial</div>
-      <div class="carrera-lbl">Escuela Profesional de Ingeniería Estadística e Informática</div>
-    </div>
-    <div class="logo-wrap">
-      <img src="https://res.cloudinary.com/dyrqu5qjz/image/upload/v1776660144/299891768_1016327032538819_7149423448576582712_n-removebg-preview_nmrjv4.png" alt="Logo Facultad FIEI"/>
-    </div>
-  </div>
-  <div class="header-sub">
-    <span><strong>Docente:</strong> (Nombre del Docente)</span>
-    <span><strong>Estudiante:</strong> (Tu Nombre Completo)</span>
-    <span><strong>Código:</strong> (Tu Código)</span>
-    <span><strong>Semestre:</strong> 2026-I</span>
-  </div>
-</header>
+<canvas id="matrixCanvas"></canvas>
 
-<div class="hero">
-  <h1>
-    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
-    Portafolio Académico de Tareas
-  </h1>
-  <p>Trabajos individuales del curso de <strong>Estadística Espacial</strong>, organizados en dos unidades temáticas. Incluye informes en PDF y código fuente.</p>
+<div id="terminal-overlay">
+  <div class="terminal-box">
+    <div id="typing-text"></div>
+    <div class="loader-container">
+      <div class="loader-bar" id="bar"></div>
+    </div>
+  </div>
 </div>
 
-<nav>
-  <a href="#presentacion">Presentación</a>
-  <a href="#unidad1">Unidad I</a>
-  <a href="#unidad2">Unidad II</a>
-</nav>
-
-<main>
-  <section id="presentacion" style="margin-bottom:34px;">
-    <p class="sec-titulo">Presentación</p>
-    <div class="presentacion">
-      El presente sitio constituye el <strong>portafolio académico</strong> de tareas individuales desarrolladas durante el curso de <strong>Estadística Espacial</strong> de la Escuela Profesional de Ingeniería Estadística e Informática de la Universidad Nacional del Altiplano – Puno. Está organizado en dos unidades: <em>Fundamentos del Análisis Espacial</em> y <em>Geoestadística y Modelado Espacial</em>. Cada tarea incluye el informe en PDF y el código fuente utilizado.
+<div id="portafolio-wrapper">
+  <header>
+    <div class="header-top">
+      <img src="https://res.cloudinary.com/dyrqu5qjz/image/upload/v1776689763/unap1_zr1qx5.ico" alt="Logo UNA" class="logo-img">
+      <img src="https://res.cloudinary.com/dyrqu5qjz/image/upload/v1776660144/299891768_1016327032538819_7149423448576582712_n-removebg-preview_nmrjv4.png" alt="Logo IEI" class="logo-img">
     </div>
-  </section>
-
-  <div id="portafolio-contenido"></div>
-</main>
-
-<footer>
-  <strong>(Tu Nombre Completo)</strong><br>
-  <span class="ac">Ingeniería Estadística e Informática</span> &nbsp;|&nbsp; Universidad Nacional del Altiplano – Puno<br>
-  Estadística Espacial &nbsp;|&nbsp; Semestre 2026-I
-</footer>
-
-<div class="overlay" id="overlay" onclick="clickFuera(event)">
-  <div class="modal" id="modal">
-    <div class="m-head">
-      <div class="m-head-left">
-        <span class="m-badge" id="mBadge">PDF</span>
-        <span class="m-titulo" id="mTitulo">Título</span>
-      </div>
-      <button class="m-close" onclick="cerrar()" title="Cerrar">✕</button>
+    <div class="sys-title">[ ESTADÍSTICA ESPACIAL V1.0 ]</div>
+    <div class="sys-grid">
+      <div>INSTITUCIÓN: <strong style="color:var(--neon)">UNA PUNO</strong></div>
+      <div>CARRERA: <strong style="color:var(--neon)">ING. ESTADÍSTICA E INFORMÁTICA</strong></div>
+      <div>USUARIO: <strong style="color:var(--neon)">J. JULIÁN MULLUNI C.</strong></div>
+      <div>CODE: <strong style="color:var(--neon)">215147</strong></div>
+      <div>DOCENTE: <strong style="color:var(--neon)">FRED TORRES CRUZ</strong></div>
+      <div>SEM: <strong style="color:var(--neon)">2026-I</strong></div>
     </div>
-    <div class="m-bar">
-      <a id="btnGH" class="btn btn-gh" href="#" target="_blank" rel="noopener">
-        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.438 9.8 8.205 11.387.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 21.795 24 17.295 24 12c0-6.63-5.37-12-12-12"/></svg>
-        Ver en GitHub
-      </a>
-      <a id="btnDL" class="btn btn-dl" href="#" target="_blank" rel="noopener">
-        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-        Descargar
-      </a>
-      <button class="btn btn-cx" onclick="cerrar()">
-        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-        Cerrar
-      </button>
-      <span class="m-ruta" id="mRuta"></span>
+    <p class="hero-desc">> Compendio de análisis avanzado de procesos puntuales, autocorrelación y geoestadística.</p>
+  </header>
+
+  <nav class="filter-nav">
+    <button class="filter-btn active" onclick="filterUnit('all', this)">[ TODO ]</button>
+    <button class="filter-btn" onclick="filterUnit('u1', this)">[ UNIDAD I ]</button>
+    <button class="filter-btn" onclick="filterUnit('u2', this)">[ UNIDAD II ]</button>
+  </nav>
+
+  <div id="tasks-container"></div>
+</div>
+
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <div class="m-bar-top"><span id="mTitulo">VISOR_DE_SISTEMA</span><span onclick="cerrar()" style="cursor:pointer">✕</span></div>
+    <div class="m-bar-sub">
+        <a id="btnGH" class="m-btn" href="#" target="_blank">VER EN GITHUB</a>
+        <a id="btnDL" class="m-btn" href="#" target="_blank">DESCARGAR</a>
+        <button class="m-btn" onclick="toggleVision()">MODO VISIÓN</button>
+        <button onclick="cerrar()" class="m-btn" style="margin-left:auto;">CERRAR</button>
     </div>
-    <div class="m-body" id="mBody">
-      <div style="color:#9399b2;padding:36px 20px;font-size:13.5px;">
-        <span class="spin"></span>Cargando…
-      </div>
-    </div>
+    <div id="mBody"></div>
   </div>
 </div>
 
 <script>
-/* ═══════════════════════════════════════════════════════════════
-   ▶ CONFIGURACIÓN – EDITA SOLO ESTA SECCIÓN
-   ═══════════════════════════════════════════════════════════════ */
-const GH_USER   = "JulianStarM";   // tu usuario GitHub
-const GH_REPO   = "estad-stica";   // nombre del repositorio
+const GH_USER = "JulianStarM"; 
+const GH_REPO = "estad-stica"; 
 const GH_BRANCH = "main";
 
-/*
-  ESTRUCTURA DE CADA TAREA:
-  {
-    num: número de la tarea (string o número),
-    titulo: "Título de la tarea",
-    desc: "Descripción corta",
-
-    pdf: "pdf/NOMBRE_EXACTO_DEL_ARCHIVO.pdf",   ← ruta EXACTA en GitHub
-         null si aún no lo subiste
-
-    codigo: "codigo/NOMBRE_EXACTO.R",            ← ruta EXACTA en GitHub
-            null si aún no lo subiste
-
-    codigoTipo: "r" | "py" | "rmd" | "qmd" | "html"  ← tipo para color del botón
-  }
-
-  ► Cuando subas un archivo nuevo a GitHub:
-    1. Pon la ruta exacta en pdf: o codigo:
-    2. Cambia null por la ruta
-
-  ► Si el nombre tiene espacios en GitHub usa el nombre con espacios:
-    pdf: "pdf/MONOGRAFIA FRED UNIDA I.pdf"
-*/
-
 const UNIDADES = [
-  {
-    id: "unidad1",
-    badge: "Unidad I",
-    titulo: "Fundamentos del Análisis Espacial",
-    tareas: [
-      {
-        num: 1,
-        titulo: "Posicionamiento de Información",
-        desc: "Lectura de datos geográficos, sistemas de coordenadas y visualización inicial con R.",
-        pdf:    "pdf/tarea1.pdf",          // ← RUTA EXACTA en tu repo GitHub
-        codigo: "codigo/tarea1.R",         // ← RUTA EXACTA en tu repo GitHub
-        codigoTipo: "r"
-      },
-      {
-        num: 2,
-        titulo: "Análisis Exploratorio Espacial",
-        desc: "Estadísticas descriptivas espaciales y visualización temática de variables geográficas.",
-        pdf:    "pdf/tarea2.pdf",          // ← RUTA EXACTA en tu repo GitHub
-        codigo: "codigo/tarea2.R",    // ← pon la ruta cuando lo subas: "codigo/tarea2.R"
-        codigoTipo: "r"
-      },
-      {
-        num: 3,
-        titulo: "Autocorrelación Espacial",
-        desc: "Cálculo del índice de Moran e interpretación de patrones espaciales globales y locales.",
-        pdf:    null,
-        codigo: null,
-        codigoTipo: "r"
-      },
-      {
-        num: 4,
-        titulo: "Patrones de Puntos",
-        desc: "Análisis de procesos puntuales: función K de Ripley y densidad de Kernel.",
-        pdf:    null,
-        codigo: null,
-        codigoTipo: "py"
-      }
-    ]
-  },
-  {
-    id: "unidad2",
-    badge: "Unidad II",
-    titulo: "Geoestadística y Modelado Espacial",
-    tareas: [
-      {
-        num: 5,
-        titulo: "Variogramas",
-        desc: "Construcción y modelado de variogramas experimentales y teóricos.",
-        pdf:    null,
-        codigo: null,
-        codigoTipo: "rmd"
-      },
-      {
-        num: 6,
-        titulo: "Interpolación Kriging",
-        desc: "Predicción espacial mediante Kriging ordinario y generación de mapas de predicción.",
-        pdf:    null,
-        codigo: null,
-        codigoTipo: "r"
-      },
-      {
-        num: 7,
-        titulo: "Modelos Espaciales de Regresión",
-        desc: "Aplicación de modelos SAR y CAR para datos con dependencia espacial.",
-        pdf:    null,
-        codigo: null,
-        codigoTipo: "r"
-      },
-      {
-        num: 8,
-        titulo: "Proyecto Final",
-        desc: "Aplicación integral de técnicas de estadística espacial sobre un caso de estudio real.",
-        pdf:    null,
-        codigo: null,
-        codigoTipo: "r"
-      }
-    ]
-  }
+  { id: 'u1', label: 'Unidad I: Fundamentos del Análisis Espacial', tareas: [
+    { num: 1, titulo: "Tarea 1 – Posicionamiento de Información", desc: "Lectura de datos geográficos, sistemas de coordenadas y visualización inicial con R.", pdf: "pdf/tarea1.pdf", codigo: "codigo/tarea1.R", status: "ENVIADO" },
+    { num: 2, titulo: "Tarea 2 – Análisis Exploratorio Espacial", desc: "Estadísticas descriptivas espaciales y visualización temática de variables geográficas.", pdf: "pdf/tarea2.pdf", codigo: "codigo/tarea2.R", status: "ENVIADO" },
+    { num: 3, titulo: "Tarea 3 – Autocorrelación Espacial", desc: "Cálculo del índice de Moran e interpretación de patrones.", pdf: null, codigo: null, status: "PENDIENTE" },
+    { num: 4, titulo: "Tarea 4 – Patrones de Puntos", desc: "Análisis de procesos puntuales: función K de Ripley y densidad de Kernel.", pdf: null, codigo: null, status: "PENDIENTE" }
+  ]}
 ];
-/* ═══════════════════════════════════════════════════════════════
-   FIN CONFIGURACIÓN
-   ═══════════════════════════════════════════════════════════════ */
 
-/* — URLs de GitHub — */
-const rawUrl = r => {
-  // Codifica el nombre del archivo (maneja espacios y caracteres especiales)
-  const partes = r.split('/');
-  const archivo = partes.pop();
-  const carpeta = partes.join('/');
-  return `https://raw.githubusercontent.com/${GH_USER}/${GH_REPO}/${GH_BRANCH}/${carpeta}/${encodeURIComponent(archivo)}`;
-};
-const ghUrl = r => {
-  const partes = r.split('/');
-  const archivo = partes.pop();
-  const carpeta = partes.join('/');
-  return `https://github.com/${GH_USER}/${GH_REPO}/blob/${GH_BRANCH}/${carpeta}/${encodeURIComponent(archivo)}`;
-};
+// SVGs de Iconos
+const ICON_PDF = `<svg viewBox="0 0 24 24"><path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/></svg>`;
+const ICON_CODE = `<svg viewBox="0 0 24 24"><path d="M14.6,16.6L19.2,12L14.6,7.4L16,6L22,12L16,18L14.6,16.6M9.4,16.6L4.8,12L9.4,7.4L8,6L2,12L8,18L9.4,16.6Z"/></svg>`;
 
-/* — Iconos SVG reutilizables — */
-const icoFile = `<svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`;
-const icoCode = `<svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>`;
-const icoPDF  = `<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>`;
-const icoCode2= `<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>`;
-const icoProx = `<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`;
-
-const TIPO_COLOR = { r:'btn-r', py:'btn-py', rmd:'btn-rmd', qmd:'btn-qmd', html:'btn-html' };
-const TIPO_LABEL = { r:'Código R', py:'Código Python', rmd:'Código Rmd', qmd:'Código Quarto', html:'Código HTML' };
-const EXT_LABEL  = { pdf:'PDF', r:'R', py:'Python', rmd:'RMarkdown', qmd:'Quarto', html:'HTML', R:'R' };
-
-function extDe(ruta) {
-  return ruta ? ruta.split('.').pop().toLowerCase() : '';
+// Matrix Engine
+const canvas = document.getElementById('matrixCanvas');
+const ctx = canvas.getContext('2d');
+canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+const letters = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZﾊﾐﾋｰｳｼﾅﾓﾆｻﾜﾂｵﾘｱﾎﾃﾏｹﾒｴｶｷﾑﾕﾗｾﾈｽﾀﾇﾍ";
+const drops = Array(Math.floor(canvas.width/16)).fill(1);
+function drawMatrix() {
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.05)'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = '#0F0'; ctx.font = '16px monospace';
+  drops.forEach((y, i) => {
+    ctx.fillText(letters[Math.floor(Math.random() * letters.length)], i * 16, y * 16);
+    if (y * 16 > canvas.height && Math.random() > 0.975) drops[i] = 0;
+    drops[i]++;
+  });
 }
-function nombreArchivo(ruta) {
-  return ruta ? ruta.split('/').pop() : '';
+setInterval(drawMatrix, 50);
+
+// Hackeo Sincronizado
+const messages = ["> INITIALIZING_SECURE_CONNECTION...", "> LOADING_PORTFOLIO_DATA_NODES...", "> BYPASSING_ACADEMIC_FIREWALL...", "> ACCESS_LEVEL: ADMINISTRATOR_J_JULIAN", "> STATUS: AUTHORIZED."];
+let line = 0, char = 0, progress = 0;
+function startLoading() {
+    const textInt = setInterval(() => {
+        if (line < messages.length) {
+            if (char < messages[line].length) {
+                document.getElementById('typing-text').innerHTML += messages[line][char];
+                char++;
+            } else { document.getElementById('typing-text').innerHTML += "<br>"; char = 0; line++; }
+        } else { clearInterval(textInt); }
+    }, 25);
+    const barInt = setInterval(() => {
+        progress += 0.5; document.getElementById('bar').style.width = progress + "%";
+        if (progress >= 100 && line >= messages.length) { clearInterval(barInt); setTimeout(accessGranted, 500); }
+    }, 20);
 }
+startLoading();
 
-/* — Construye el HTML de una tarea — */
-function htmlTarea(t) {
-  const nomPDF = t.pdf    ? nombreArchivo(t.pdf)    : null;
-  const nomCod = t.codigo ? nombreArchivo(t.codigo) : null;
-
-  // Chips de archivo
-  const chipPDF = nomPDF
-    ? `<span class="file-chip disponible">${icoFile} ${nomPDF}</span>`
-    : `<span class="file-chip pendiente">${icoFile} PDF – pendiente</span>`;
-
-  const chipCod = nomCod
-    ? `<span class="file-chip disponible">${icoCode} ${nomCod}</span>`
-    : `<span class="file-chip pendiente">${icoCode} Código – pendiente</span>`;
-
-  // Botón PDF
-  const btnPDF = t.pdf
-    ? `<button class="btn btn-pdf" onclick="abrirModal('pdf','Tarea ${t.num} – ${t.titulo}','${t.pdf}')">${icoPDF} Ver Informe PDF</button>`
-    : `<button class="btn btn-pdf" disabled title="Próximamente">${icoProx} PDF – Próximamente</button>`;
-
-  // Botón Código
-  const clsCod = TIPO_COLOR[t.codigoTipo] || 'btn-gen';
-  const lblCod = TIPO_LABEL[t.codigoTipo] || 'Ver Código';
-  const btnCod = t.codigo
-    ? `<button class="btn ${clsCod}" onclick="abrirModal('code','Tarea ${t.num} – ${t.titulo}','${t.codigo}')">${icoCode2} Ver ${lblCod}</button>`
-    : `<button class="btn ${clsCod}" disabled title="Próximamente">${icoProx} ${lblCod} – Próximamente</button>`;
-
-  return `
-    <div class="tarea">
-      <div class="t-num">${t.num}</div>
-      <div class="t-info">
-        <h3>Tarea ${t.num} – ${t.titulo}</h3>
-        <p class="t-desc">${t.desc}</p>
-        <div class="t-files">${chipPDF}${chipCod}</div>
-      </div>
-      <div class="t-btns">${btnPDF}${btnCod}</div>
-    </div>`;
+function accessGranted() {
+  document.getElementById('terminal-overlay').style.display = 'none';
+  document.getElementById('matrixCanvas').classList.add('authorized');
+  const w = document.getElementById('portafolio-wrapper');
+  w.style.display = 'block'; setTimeout(() => w.style.opacity = 1, 50);
+  renderTasks('all');
 }
 
-/* — Construye el HTML de una unidad — */
-function htmlUnidad(u) {
-  return `
-    <section id="${u.id}" class="unidad">
-      <div class="unidad-header">
-        <span class="badge">${u.badge}</span>
-        <h2>${u.titulo}</h2>
-      </div>
-      <div class="tareas-lista">
-        ${u.tareas.map(htmlTarea).join('')}
-      </div>
-    </section>`;
-}
-
-/* — Renderiza todo — */
-document.getElementById('portafolio-contenido').innerHTML =
-  UNIDADES.map(htmlUnidad).join('');
-
-/* — Modal — */
-function abrirModal(tipo, titulo, ruta) {
-  const raw = rawUrl(ruta);
-  const gh  = ghUrl(ruta);
-  const nom = nombreArchivo(ruta);
-  const ext = extDe(ruta);
-
-  document.getElementById('mBadge').textContent =
-    tipo === 'pdf' ? '📄 PDF' : '💻 ' + (EXT_LABEL[ext] || ext.toUpperCase());
-  document.getElementById('mBadge').style.background =
-    tipo === 'pdf' ? 'rgba(185,28,28,.55)' : 'rgba(255,255,255,.18)';
-
-  document.getElementById('mTitulo').textContent = titulo;
-  document.getElementById('mRuta').textContent   = nom;
-  document.getElementById('btnGH').href          = gh;
-  document.getElementById('btnDL').href          = raw;
-
-  const body = document.getElementById('mBody');
-  body.innerHTML = '';
-
-  if (tipo === 'pdf') {
-    body.style.background = '#fff';
-    const viewerUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(raw)}&embedded=true`;
-    const iframe = document.createElement('iframe');
-    iframe.src = viewerUrl;
-    iframe.style.cssText = 'width:100%;min-height:560px;border:none;display:block;';
-    iframe.setAttribute('loading','lazy');
-    body.appendChild(iframe);
-    const nota = document.createElement('div');
-    nota.style.cssText = 'background:#f8f9fb;border-left:3px solid #3a7fc1;padding:10px 16px;color:#3d4550;font-size:12.5px;font-family:sans-serif;';
-    nota.innerHTML = '⚠ Si el PDF no carga en el visor usa <strong>Ver en GitHub</strong> o <strong>Descargar</strong>.';
-    body.appendChild(nota);
-  } else {
-    body.style.background = '#1e1e2e';
-    const nota = document.createElement('div');
-    nota.className = 'm-nota';
-    nota.innerHTML = `💻 <strong>${nom}</strong> — cargando desde GitHub…`;
-    body.appendChild(nota);
-    const pre = document.createElement('pre');
-    pre.className = 'code-pre';
-    pre.innerHTML = '<span class="spin"></span> Cargando…';
-    body.appendChild(pre);
-
-    fetch(raw)
-      .then(r => {
-        if (!r.ok) throw new Error(r.status);
-        return r.text();
-      })
-      .then(txt => {
-        nota.innerHTML = `💻 <strong>${nom}</strong> &nbsp;·&nbsp; ${txt.split('\n').length} líneas`;
-        pre.textContent = txt;
-      })
-      .catch(err => {
-        nota.innerHTML = `⚠ No se pudo cargar <strong>${nom}</strong> (error ${err.message}). Verifica que el repositorio sea público y el archivo esté subido con ese nombre exacto.`;
-        pre.textContent =
-          '⚠  Archivo no encontrado: ' + ruta + '\n\n' +
-          'Verifica:\n' +
-          '  1. GH_USER = "' + GH_USER + '" — ¿es correcto?\n' +
-          '  2. GH_REPO = "' + GH_REPO + '" — ¿es correcto?\n' +
-          '  3. El repositorio es PÚBLICO en GitHub\n' +
-          '  4. El archivo existe exactamente en: ' + ruta + '\n\n' +
-          'Usa el botón "Ver en GitHub" para verificar la ruta directamente.';
+function renderTasks(filter) {
+  const container = document.getElementById('tasks-container');
+  container.innerHTML = '';
+  UNIDADES.forEach(u => {
+    if(filter === 'all' || filter === u.id) {
+      container.innerHTML += `<div style="color:var(--neon); margin:40px 0 25px; font-weight:bold; letter-spacing: 2px;">[ ${u.label.toUpperCase()} ]</div>`;
+      u.tareas.forEach(t => {
+        const isSent = t.status === "ENVIADO";
+        container.innerHTML += `
+          <div class="tarea-card">
+            <div class="t-num">${t.num}</div>
+            <div class="t-info">
+                <strong>${t.titulo.toUpperCase()}</strong>
+                <p>${t.desc}</p>
+                <div class="t-status-inline ${isSent ? 'status-ok' : 'status-pending'}">
+                    ${isSent ? 'STATUS: ENVIADO' : 'STATUS: PENDIENTE'}
+                </div>
+            </div>
+            <div class="t-actions">
+              <button class="btn-sys" ${t.pdf ? `onclick="abrir('PDF','${t.titulo}','${t.pdf}')"` : 'disabled'}>
+                ${ICON_PDF} ${t.pdf ? 'Ver Informe' : 'Próximamente'}
+              </button>
+              <button class="btn-sys" ${t.codigo ? `onclick="abrir('CODE','${t.titulo}','${t.codigo}')"` : 'disabled'}>
+                ${ICON_CODE} ${t.codigo ? 'Ver Código R' : 'Próximamente'}
+              </button>
+            </div>
+          </div>`;
       });
+    }
+  });
+}
+
+function filterUnit(id, btn) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderTasks(id);
+}
+
+function abrir(tipo, titulo, ruta) {
+  const raw = `https://raw.githubusercontent.com/${GH_USER}/${GH_REPO}/${GH_BRANCH}/${ruta}`;
+  const body = document.getElementById('mBody');
+  document.getElementById('mTitulo').innerText = titulo.toUpperCase();
+  document.getElementById('btnGH').href = `https://github.com/${GH_USER}/${GH_REPO}/blob/${GH_BRANCH}/${ruta}`;
+  document.getElementById('btnDL').href = raw;
+  if(tipo === 'PDF') {
+    const pdfUrl = `https://mozilla.github.io/pdf.js/web/viewer.html?file=${encodeURIComponent(raw)}`;
+    body.innerHTML = `<iframe id="pdfFrame" class="pdf-frame dark-pdf" src="${pdfUrl}"></iframe>`;
+  } else {
+    fetch(raw).then(r => r.text()).then(t => {
+      body.innerHTML = `<pre style="padding:30px; color:var(--neon); font-size:13px; overflow:auto; height:100%">${t.replace(/</g, '&lt;')}</pre>`;
+    });
   }
-
   document.getElementById('overlay').classList.add('open');
-  document.body.style.overflow = 'hidden';
 }
 
-function cerrar() {
-  document.getElementById('overlay').classList.remove('open');
-  document.body.style.overflow = '';
-  document.getElementById('mBody').innerHTML = '';
-}
-function clickFuera(e) {
-  if (e.target === document.getElementById('overlay')) cerrar();
-}
-document.addEventListener('keydown', e => { if (e.key === 'Escape') cerrar(); });
+function toggleVision() { const f = document.getElementById('pdfFrame'); if(f) f.classList.toggle('dark-pdf'); }
+function cerrar() { document.getElementById('overlay').classList.remove('open'); }
+window.addEventListener('resize', () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; });
 </script>
 </body>
 </html>
