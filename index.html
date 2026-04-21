@@ -14,19 +14,10 @@
       --text: #d0d0d0;
     }
 
-    * { 
-      box-sizing: border-box; 
-      margin: 0; padding: 0; 
-      scrollbar-width: none; 
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; scrollbar-width: none; }
     *::-webkit-scrollbar { display: none; }
 
-    body { 
-      background: var(--bg); 
-      color: var(--text); 
-      font-family: 'Source Code Pro', monospace; 
-      overflow: hidden; 
-    }
+    body { background: var(--bg); color: var(--text); font-family: 'Source Code Pro', monospace; overflow: hidden; }
 
     #matrixCanvas { position: fixed; top: 0; left: 0; z-index: 5; transition: opacity 1.5s ease, filter 1.5s ease; }
     #matrixCanvas.authorized { opacity: 0.25; filter: blur(2px); }
@@ -68,10 +59,9 @@
     .filter-btn { background: transparent; border: 1px solid var(--neon-dim); color: var(--neon-dim); padding: 10px 20px; cursor: pointer; font-family: inherit; font-size: 0.85rem; transition: 0.3s; }
     .filter-btn.active { border-color: var(--neon); color: var(--neon); background: rgba(0,255,65,0.1); }
 
-    /* Tarjetas de Tareas */
     .tarea-card { 
       background: rgba(15, 15, 15, 0.95); border: 1px solid #222; padding: 30px; 
-      margin-bottom: 25px; display: grid; grid-template-columns: 60px 1fr 220px; 
+      margin-bottom: 25px; display: grid; grid-template-columns: 60px 1fr 240px; 
       gap: 25px; align-items: start; transition: 0.3s;
     }
     .tarea-card:hover { border-color: var(--neon); background: rgba(0, 40, 0, 0.8); }
@@ -80,7 +70,6 @@
     .t-info strong { color: var(--neon); display: block; margin-bottom: 10px; font-size: 1.1rem; }
     .t-info p { font-size: 0.9rem; color: #999; line-height: 1.6; margin-bottom: 15px; }
     
-    /* Estado debajo de la descripción */
     .t-status-inline { 
         display: inline-flex; align-items: center; gap: 8px; font-size: 0.75rem; 
         font-weight: bold; letter-spacing: 1px; padding: 4px 12px; border: 1px solid;
@@ -98,9 +87,8 @@
     }
     .btn-sys svg { width: 14px; height: 14px; fill: currentColor; }
     .btn-sys:hover { background: var(--neon); color: #000; }
-    .btn-sys:disabled { border-color: #333; color: #333; cursor: not-allowed; }
+    .btn-sys:disabled { border-color: #333; color: #333; cursor: not-allowed; opacity: 0.5; }
 
-    /* Modal Visor */
     .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.97); z-index: 50000; padding: 25px; }
     .overlay.open { display: flex; align-items: center; justify-content: center; }
     .modal { background: #000; border: 1px solid var(--neon); width: 100%; max-width: 1200px; height: 94vh; display: flex; flex-direction: column; }
@@ -132,7 +120,7 @@
       <img src="https://res.cloudinary.com/dyrqu5qjz/image/upload/v1776689763/unap1_zr1qx5.ico" alt="Logo UNA" class="logo-img">
       <img src="https://res.cloudinary.com/dyrqu5qjz/image/upload/v1776660144/299891768_1016327032538819_7149423448576582712_n-removebg-preview_nmrjv4.png" alt="Logo IEI" class="logo-img">
     </div>
-    <div class="sys-title">[ ESTADÍSTICA ESPACIAL V1.0 ]</div>
+    <div class="sys-title">[ SISTEMA DE ESTADÍSTICA ESPACIAL V2.0 ]</div>
     <div class="sys-grid">
       <div>INSTITUCIÓN: <strong style="color:var(--neon)">UNA PUNO</strong></div>
       <div>CARRERA: <strong style="color:var(--neon)">ING. ESTADÍSTICA E INFORMÁTICA</strong></div>
@@ -173,14 +161,59 @@ const GH_BRANCH = "main";
 
 const UNIDADES = [
   { id: 'u1', label: 'Unidad I: Fundamentos del Análisis Espacial', tareas: [
-    { num: 1, titulo: "Tarea 1 – Posicionamiento de Información", desc: "Lectura de datos geográficos, sistemas de coordenadas y visualización inicial con R.", pdf: "pdf/tarea1.pdf", codigo: "codigo/tarea1.R", status: "ENVIADO" },
-    { num: 2, titulo: "Tarea 2 – Análisis Exploratorio Espacial", desc: "Estadísticas descriptivas espaciales y visualización temática de variables geográficas.", pdf: "pdf/tarea2.pdf", codigo: "codigo/tarea2.R", status: "ENVIADO" },
-    { num: 3, titulo: "Tarea 3 – Autocorrelación Espacial", desc: "Cálculo del índice de Moran e interpretación de patrones.", pdf: null, codigo: null, status: "PENDIENTE" },
-    { num: 4, titulo: "Tarea 4 – Patrones de Puntos", desc: "Análisis de procesos puntuales: función K de Ripley y densidad de Kernel.", pdf: null, codigo: null, status: "PENDIENTE" }
+    { 
+      num: 1, 
+      titulo: "Tarea 1 – Ubicación Espacial", 
+      desc: "Lectura de datos geográficos, sistemas de coordenadas y visualización inicial con R.", 
+      pdf: "pdf/Ubicación_Espacial.pdf", 
+      codigo: "codigo/ENA_Analisis_Espacial_Completo.Rmd", 
+      codigoTipo: "r" 
+    },
+    { 
+      num: 2, 
+      titulo: "Tarea 2 – .....", 
+      desc: "....", 
+      pdf: null, 
+      codigo: null, 
+      codigoTipo: "r" 
+    },
+    { 
+      num: 3, 
+      titulo: "Tarea 3 –........", 
+      desc: "....", 
+      pdf: null, 
+      codigo: null, 
+      codigoTipo: "r" 
+    },
+    { 
+      num: 4, 
+      titulo: "Tarea 4 –...", 
+      desc: "....   .", 
+      pdf: null, 
+      codigo: null, 
+      codigoTipo: "python" 
+    }
+  ]},
+  { id: 'u2', label: 'Unidad II: Geoestadística y Modelado', tareas: [
+    { 
+      num: 5, 
+      titulo: "Tarea 5 –...", 
+      desc: "...", 
+      pdf: null, 
+      codigo: null, 
+      codigoTipo: "r" 
+    },
+    { 
+      num: 6, 
+      titulo: "Tarea 6 – ...", 
+      desc: "...", 
+      pdf: null, 
+      codigo: null, 
+      codigoTipo: "r" 
+    }
   ]}
 ];
 
-// SVGs de Iconos
 const ICON_PDF = `<svg viewBox="0 0 24 24"><path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/></svg>`;
 const ICON_CODE = `<svg viewBox="0 0 24 24"><path d="M14.6,16.6L19.2,12L14.6,7.4L16,6L22,12L16,18L14.6,16.6M9.4,16.6L4.8,12L9.4,7.4L8,6L2,12L8,18L9.4,16.6Z"/></svg>`;
 
@@ -235,7 +268,7 @@ function renderTasks(filter) {
     if(filter === 'all' || filter === u.id) {
       container.innerHTML += `<div style="color:var(--neon); margin:40px 0 25px; font-weight:bold; letter-spacing: 2px;">[ ${u.label.toUpperCase()} ]</div>`;
       u.tareas.forEach(t => {
-        const isSent = t.status === "ENVIADO";
+        const isSent = t.pdf !== null;
         container.innerHTML += `
           <div class="tarea-card">
             <div class="t-num">${t.num}</div>
@@ -248,10 +281,10 @@ function renderTasks(filter) {
             </div>
             <div class="t-actions">
               <button class="btn-sys" ${t.pdf ? `onclick="abrir('PDF','${t.titulo}','${t.pdf}')"` : 'disabled'}>
-                ${ICON_PDF} ${t.pdf ? 'Ver Informe' : 'Próximamente'}
+                ${ICON_PDF} ${t.pdf ? 'Ver Informe' : 'PRÓXIMAMENTE'}
               </button>
               <button class="btn-sys" ${t.codigo ? `onclick="abrir('CODE','${t.titulo}','${t.codigo}')"` : 'disabled'}>
-                ${ICON_CODE} ${t.codigo ? 'Ver Código R' : 'Próximamente'}
+                ${ICON_CODE} ${t.codigo ? 'Ver Código ' + t.codigoTipo.toUpperCase() : 'PRÓXIMAMENTE'}
               </button>
             </div>
           </div>`;

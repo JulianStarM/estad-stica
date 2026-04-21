@@ -1,0 +1,1137 @@
+---
+title: "Análisis Espacial Agropecuario - ENA 2014-2024"
+author: "JOSÉ JULIAN MULLUNI CÁNDIA"
+date: "`r Sys.Date()`"
+output: html_notebook
+---
+
+# ============================================================
+# 0. INSTALACIÓN DE PAQUETES (solo ejecutar una vez)
+# ============================================================
+
+```{r instalar_paquetes, eval=FALSE}
+install.packages(c(
+  "haven",
+  "dplyr",
+  "ggplot2",
+  "sf",
+  "rnaturalearth",
+  "rnaturalearthdata",
+  "rnaturalearthhires",
+  "viridis",
+  "tidyr",
+  "knitr",
+  "scales",
+  "gridExtra"
+))
+```
+
+---
+
+# ============================================================
+# 1. CARGAR LIBRERÍAS
+# ============================================================
+
+```{r cargar_librerias, message=FALSE, warning=FALSE}
+library(haven)
+library(dplyr)
+library(ggplot2)
+library(sf)
+library(rnaturalearth)
+library(rnaturalearthdata)
+library(viridis)
+library(tidyr)
+library(knitr)
+library(scales)
+library(gridExtra)
+
+cat("brerías cargadas correctamente\n")
+cat("R version:", R.version$major, ".", R.version$minor, "\n")
+cat("haven:", as.character(packageVersion("haven")), "\n")
+cat("sf:",    as.character(packageVersion("sf")),    "\n")
+```
+
+---
+
+# ============================================================
+# 2. LECTURA DE DATOS (.sav)
+# ============================================================
+
+```{r leer_datos}
+# AJUSTA la ruta a tu archivo .sav
+datos <- read_sav(
+  "D:/10 SEMESTRE/ESTADISTICA ESPACIAL/ENA_2014_2024.sav",
+  encoding   = "latin1",
+  col_select = c("ANIO", "CCDD", "CCPP", "CCDI",
+                 "P1103", "P1105", "P1107", "P1107B")
+)
+
+cat("atos cargados:", nrow(datos), "filas |", ncol(datos), "columnas\n")
+glimpse(datos)
+```
+
+---
+
+# ============================================================
+# 3. ANÁLISIS DE CALIDAD DE DATOS (valores faltantes)
+# ============================================================
+
+```{r calidad_datos}
+calidad <- data.frame(
+  Variable            = names(datos),
+  N_total             = sapply(datos, length),
+  N_faltante          = sapply(datos, function(x) sum(is.na(x))),
+  Porcentaje_faltante = round(sapply(datos, function(x) mean(is.na(x)) * 100), 2)
+)
+
+knitr::kable(
+  calidad,
+  caption = "Tabla 1. Calidad de datos – valores faltantes por variable"
+)
+```
+
+```{r visualizar_missing}
+ggplot(calidad, aes(x = reorder(Variable, -Porcentaje_faltante),
+                    y = Porcentaje_faltante,
+                    fill = Porcentaje_faltante)) +
+  geom_col(width = 0.6) +
+  geom_text(aes(label = paste0(Porcentaje_faltante, "%")),
+            vjust = -0.4, size = 3.5) +
+  scale_fill_viridis_c(option = "magma", direction = -1) +
+  labs(
+    title    = "Porcentaje de valores faltantes por variable",
+    subtitle = "Encuesta Nacional Agropecuaria 2014–2024",
+    x        = "Variable",
+    y        = "% de NA",
+    fill     = "% NA"
+  ) +
+  theme_minimal(base_size = 13) +
+  theme(legend.position = "none")
+```
+
+---
+
+# ============================================================
+# 4. LIMPIEZA DE DATOS
+# ============================================================
+
+```{r limpieza}
+# Verificar % NA en variables clave
+vars_clave <- c("P1107", "P1107B", "CCDD")
+pct_clave  <- calidad %>%
+  filter(Variable %in% vars_clave) %>%
+  select(Variable, Porcentaje_faltante)
+
+cat("Porcentaje NA en variables clave:\n")
+print(pct_clave)
+
+# Limpieza principal
+ena_clean <- datos %>%
+  mutate(across(everything(), ~zap_labels(.))) %>%
+  mutate(
+    ANIO   = as.integer(ANIO),
+    CCDD   = sprintf("%02d", as.integer(CCDD)),
+    P1103  = as.integer(P1103),
+    P1105  = as.integer(P1105),
+    P1107  = as.integer(P1107),
+    P1107B = as.integer(P1107B)
+  ) %>%
+  filter(P1107 == 1) %>%
+  filter(!is.na(P1107B), !is.na(CCDD))
+
+cat("\n Dimensiones tras limpieza:", nrow(ena_clean), "filas\n")
+cat("Filas eliminadas:", nrow(datos) - nrow(ena_clean), "\n")
+```
+
+---
+
+# ============================================================
+# 5. ANÁLISIS EXPLORATORIO
+# ============================================================
+
+
+```{r}
+# library(gridExtra)
+# grid.arrange(p1, p2, p3, ncol = 3)
+```
+
+
+```{r exploratorio_sexo}
+library(gridExtra)
+# --- Sexo (P1103) ---
+p1 <- ena_clean %>%
+  count(P1103) %>%
+  mutate(
+    sexo = factor(P1103, levels = c(1, 2), labels = c("Hombre", "Mujer")),
+    pct  = round(n / sum(n) * 100, 1)
+  ) %>%
+  ggplot(aes(x = sexo, y = pct, fill = sexo)) +
+  geom_col(width = 0.5) +
+  geom_text(aes(label = paste0(pct, "%")), vjust = -0.4, size = 4) +
+  scale_fill_manual(values = c("#2196F3", "#E91E63")) +
+  labs(title = "Distribución por Sexo (P1103)", x = NULL, y = "%") +
+  theme_minimal(base_size = 12) +
+  theme(legend.position = "none")
+
+# --- Participación agropecuaria (P1107) ---
+p2 <- ena_clean %>%
+  count(P1107) %>%
+  mutate(
+    participa = factor(P1107, levels = c(1, 2),
+                       labels = c("Sí participa", "No participa")),
+    pct = round(n / sum(n) * 100, 1)
+  ) %>%
+  ggplot(aes(x = participa, y = pct, fill = participa)) +
+  geom_col(width = 0.5) +
+  geom_text(aes(label = paste0(pct, "%")), vjust = -0.4, size = 4) +
+  scale_fill_viridis_d(begin = 0.2, end = 0.8) +
+  labs(title = "Participación Agropecuaria (P1107)", x = NULL, y = "%") +
+  theme_minimal(base_size = 12) +
+  theme(legend.position = "none")
+
+# --- Decisiones agropecuarias (P1107B) ---
+p3 <- ena_clean %>%
+  count(P1107B) %>%
+  mutate(
+    decide = factor(P1107B, levels = c(1, 2),
+                    labels = c("Sí decide", "No decide")),
+    pct = round(n / sum(n) * 100, 1)
+  ) %>%
+  ggplot(aes(x = decide, y = pct, fill = decide)) +
+  geom_col(width = 0.5) +
+  geom_text(aes(label = paste0(pct, "%")), vjust = -0.4, size = 4) +
+  scale_fill_viridis_d(begin = 0.3, end = 0.9, option = "plasma") +
+  labs(title = "Decisiones Agropecuarias (P1107B)", x = NULL, y = "%") +
+  theme_minimal(base_size = 12) +
+  theme(legend.position = "none")
+
+grid.arrange(p1, p2, p3, ncol = 3)
+```
+
+---
+
+# ============================================================
+# 6. TABLAS DE INDICADORES
+# ============================================================
+
+```{r tabla_cruzada}
+tabla_cruzada <- ena_clean %>%
+  mutate(
+    Sexo      = factor(P1103,  levels = c(1, 2), labels = c("Hombre", "Mujer")),
+    Participa = factor(P1107,  levels = c(1, 2), labels = c("Sí", "No")),
+    Decide    = factor(P1107B, levels = c(1, 2), labels = c("Sí", "No"))
+  ) %>%
+  group_by(Sexo, Participa) %>%
+  summarise(n = n(), .groups = "drop") %>%
+  group_by(Sexo) %>%
+  mutate(pct = round(n / sum(n) * 100, 1)) %>%
+  ungroup()
+
+knitr::kable(
+  tabla_cruzada,
+  caption    = "Tabla 2. Participación en labores agropecuarias según sexo",
+  col.names  = c("Sexo", "Participa", "N", "%")
+)
+```
+
+
+
+```{r tabla_departamentos}
+library(dplyr)
+library(knitr)
+# Tabla CCDD → nombre departamento (INEI oficial)
+tabla_dep <- tibble::tribble(
+  ~CCDD, ~departamento,
+  "01", "Amazonas",      "02", "Áncash",        "03", "Apurímac",
+  "04", "Arequipa",      "05", "Ayacucho",       "06", "Cajamarca",
+  "07", "Callao",        "08", "Cusco",          "09", "Huancavelica",
+  "10", "Huánuco",       "11", "Ica",            "12", "Junín",
+  "13", "La Libertad",   "14", "Lambayeque",     "15", "Lima",
+  "16", "Loreto",        "17", "Madre de Dios",  "18", "Moquegua",
+  "19", "Pasco",         "20", "Piura",          "21", "Puno",
+  "22", "San Martín",    "23", "Tacna",          "24", "Tumbes",
+  "25", "Ucayali"
+)
+
+# Indicadores generales por departamento
+indicadores_dep <- ena_clean %>%
+  group_by(CCDD) %>%
+  summarise(
+    n_total       = n(),
+    n_participa   = sum(P1107  == 1, na.rm = TRUE),
+    n_decide      = sum(P1107B == 1, na.rm = TRUE),
+    pct_participa = round(n_participa / n_total * 100, 2),
+    pct_decide    = round(n_decide    / n_total * 100, 2),
+    .groups = "drop"
+  ) %>%
+  left_join(tabla_dep, by = "CCDD")
+
+knitr::kable(
+  indicadores_dep %>% select(CCDD, departamento, pct_participa, pct_decide),
+  caption   = "Tabla 3. Indicadores agropecuarios por departamento",
+  col.names = c("CCDD", "Departamento", "% Participa", "% Decide")
+)
+```
+
+```{r barras_departamentos}
+library(ggplot2)
+ggplot(indicadores_dep,
+       aes(x = reorder(departamento, pct_decide), y = pct_decide)) +
+  geom_col(fill = "steelblue") +
+  coord_flip() +
+  labs(
+    title = "Participación en decisiones agropecuarias por departamento",
+    x     = "Departamento",
+    y     = "% Decide"
+  ) +
+  theme_minimal()
+```
+
+---
+
+# ============================================================
+# 7. PREPARACIÓN DEL MAPA BASE (shapefile departamentos)
+# ============================================================
+
+```{r shapefile_peru}
+library(rnaturalearth)
+library(rnaturalearthdata)
+library(sf)
+library(ggplot2)
+# Obtener shapefile a nivel departamentos
+peru_dep <- ne_states(country = "Peru", returnclass = "sf")
+
+# Ver nombres exactos del shapefile para la correspondencia
+cat("Nombres de departamentos en shapefile:\n")
+print(sort(peru_dep$name))
+
+# Verificar mapa base
+ggplot(peru_dep) +
+  geom_sf(fill = "lightgray", color = "white", linewidth = 0.5) +
+  labs(title = "Mapa base – Departamentos del Perú") +
+  theme_void()
+```
+
+```{r correspondencia_nombres}
+# Tabla de correspondencia shapefile ↔ CCDD
+# Si algún nombre difiere, ajústalo según lo que imprima el chunk anterior
+corresp_dep <- tibble::tribble(
+  ~CCDD, ~departamento,    ~name_sf,
+  "01",  "Amazonas",       "Amazonas",
+  "02",  "Áncash",         "Ancash",
+  "03",  "Apurímac",       "Apurímac",
+  "04",  "Arequipa",       "Arequipa",
+  "05",  "Ayacucho",       "Ayacucho",
+  "06",  "Cajamarca",      "Cajamarca",
+  "07",  "Callao",         "Callao",
+  "08",  "Cusco",          "Cusco",
+  "09",  "Huancavelica",   "Huancavelica",
+  "10",  "Huánuco",        "Huánuco",
+  "11",  "Ica",            "Ica",
+  "12",  "Junín",          "Junín",
+  "13",  "La Libertad",    "La Libertad",
+  "14",  "Lambayeque",     "Lambayeque",
+  "15",  "Lima",           "Lima",
+  "16",  "Loreto",         "Loreto",
+  "17",  "Madre de Dios",  "Madre de Dios",
+  "18",  "Moquegua",       "Moquegua",
+  "19",  "Pasco",          "Pasco",
+  "20",  "Piura",          "Piura",
+  "21",  "Puno",           "Puno",
+  "22",  "San Martín",     "San Martín",
+  "23",  "Tacna",          "Tacna",
+  "24",  "Tumbes",         "Tumbes",
+  "25",  "Ucayali",        "Ucayali"
+)
+```
+
+
+
+```{r}
+peru_dep$name <- gsub("Province", "", peru_dep$name)
+peru_dep$name <- trimws(peru_dep$name)
+corresp_dep <- corresp_dep %>%
+  mutate(name_sf = case_when(
+    name_sf == "Ancash" ~ "Ancash",
+    name_sf == "Áncash" ~ "Ancash",
+    name_sf == "Lima"   ~ "Lima",
+    TRUE ~ name_sf
+  ))
+
+library(stringi)
+
+peru_dep$name <- stringi::stri_trans_general(peru_dep$name, "Latin-ASCII")
+corresp_dep$name_sf <- stringi::stri_trans_general(corresp_dep$name_sf, "Latin-ASCII")
+
+peru_mapa <- peru_dep %>%
+  left_join(corresp_dep, by = c("name" = "name_sf")) %>%
+  left_join(indicadores_dep, by = c("CCDD", "departamento"))
+
+
+```
+
+
+```{r merge_principal}
+# Merge indicadores generales con shapefile
+peru_mapa <- peru_dep %>%
+  left_join(corresp_dep, by = c("name" = "name_sf")) %>%
+  left_join(indicadores_dep, by = c("CCDD", "departamento"))
+
+# Verificar merge
+sin_match <- peru_mapa %>%
+  filter(is.na(pct_participa)) %>%
+  pull(name)
+
+if (length(sin_match) > 0) {
+  cat("  Sin datos para:", paste(sin_match, collapse = ", "), "\n")
+} else {
+  cat("Merge exitoso – todos los departamentos tienen datos\n")
+}
+```
+
+```{r centroides}
+# Centroides para etiquetas en todos los mapas
+centroides <- peru_mapa %>%
+  st_centroid() %>%
+  mutate(
+    lon = st_coordinates(.)[, 1],
+    lat = st_coordinates(.)[, 2]
+  ) %>%
+  st_drop_geometry() %>%
+  select(name, departamento, pct_participa, pct_decide, lon, lat)
+```
+
+---
+
+# ============================================================
+# 8. MAPA 1 — PARTICIPACIÓN AGROPECUARIA
+# ============================================================
+
+```{r mapa1_participacion, fig.width=10, fig.height=12}
+mapa1 <- ggplot(peru_mapa) +
+  geom_sf(aes(fill = pct_participa), color = "white", linewidth = 0.4) +
+  geom_text(
+    data          = centroides %>% filter(!is.na(departamento)),
+    aes(x = lon, y = lat,
+        label = paste0(departamento, "\n", round(pct_participa, 1), "%")),
+    size          = 2.0,
+    color         = "white",
+    fontface      = "bold",
+    lineheight    = 0.85,
+    check_overlap = TRUE
+  ) +
+  scale_fill_viridis_c(
+    option   = "viridis",
+    name     = "% Participación",
+    labels   = function(x) paste0(x, "%"),
+    na.value = "grey80"
+  ) +
+  labs(
+    title    = "Participación en Labores Agropecuarias por Departamento",
+    subtitle = "Porcentaje de personas que participan (P1107 = 1) · ENA 2014–2024",
+    caption  = "Fuente: Encuesta Nacional Agropecuaria – INEI / MIDAGRI"
+  ) +
+  theme_void(base_size = 13) +
+  theme(
+    plot.title       = element_text(face = "bold", hjust = 0.5, size = 15,
+                                    margin = margin(b = 6)),
+    plot.subtitle    = element_text(hjust = 0.5, color = "gray40", size = 10,
+                                    margin = margin(b = 10)),
+    plot.caption     = element_text(hjust = 0, color = "gray50", size = 8),
+    legend.position  = "right",
+    legend.title     = element_text(size = 10, face = "bold"),
+    legend.text      = element_text(size = 9),
+    plot.background  = element_rect(fill = "white", color = NA),
+    plot.margin      = margin(10, 10, 10, 10)
+  )
+
+print(mapa1)
+ggsave("mapa1_participacion.png", mapa1, width = 10, height = 12, dpi = 200)
+cat("✅ mapa1_participacion.png guardado\n")
+```
+
+---
+
+
+
+# ============================================================
+# 9. MAPA 2 — TOMA DE DECISIONES AGROPECUARIAS
+# ============================================================
+
+```{r mapa2_decisiones, fig.width=10, fig.height=12}
+mapa2 <- ggplot(peru_mapa) +
+  geom_sf(aes(fill = pct_decide), color = "white", linewidth = 0.4) +
+  geom_text(
+    data          = centroides %>% filter(!is.na(departamento)),
+    aes(x = lon, y = lat,
+        label = paste0(departamento, "\n", round(pct_decide, 1), "%")),
+    size          = 2.0,
+    color         = "white",
+    fontface      = "bold",
+    lineheight    = 0.85,
+    check_overlap = TRUE
+  ) +
+  scale_fill_viridis_c(
+    option   = "plasma",
+    name     = "% Decisiones",
+    labels   = function(x) paste0(x, "%"),
+    na.value = "grey80"
+  ) +
+  labs(
+    title    = "Participación en Decisiones Agropecuarias por Departamento",
+    subtitle = "Porcentaje de personas que toman decisiones (P1107B = 1) · ENA 2014–2024",
+    caption  = "Fuente: Encuesta Nacional Agropecuaria – INEI / MIDAGRI"
+  ) +
+  theme_void(base_size = 13) +
+  theme(
+    plot.title       = element_text(face = "bold", hjust = 0.5, size = 15,
+                                    margin = margin(b = 6)),
+    plot.subtitle    = element_text(hjust = 0.5, color = "gray40", size = 10,
+                                    margin = margin(b = 10)),
+    plot.caption     = element_text(hjust = 0, color = "gray50", size = 8),
+    legend.position  = "right",
+    legend.title     = element_text(size = 10, face = "bold"),
+    legend.text      = element_text(size = 9),
+    plot.background  = element_rect(fill = "white", color = NA),
+    plot.margin      = margin(10, 10, 10, 10)
+  )
+
+print(mapa2)
+ggsave("mapa2_decisiones.png", mapa2, width = 10, height = 12, dpi = 200)
+cat("mapa2_decisiones.png guardado\n")
+```
+
+---
+
+# ============================================================
+#  MAPA  — COMPARATIVO POR GÉNERO (facet_wrap)
+# ============================================================
+
+```{r indicadores_sexo}
+# Indicadores por departamento y sexo
+indicadores_sexo <- ena_clean %>%
+  mutate(Sexo = factor(P1103, levels = c(1, 2), labels = c("Hombre", "Mujer"))) %>%
+  group_by(CCDD, Sexo) %>%
+  summarise(
+    pct_participa = round(mean(P1107 == 1, na.rm = TRUE) * 100, 2),
+    .groups = "drop"
+  ) %>%
+  left_join(corresp_dep, by = "CCDD")
+
+# Merge con shapefile
+peru_sexo_mapa <- peru_dep %>%
+  left_join(corresp_dep, by = c("name" = "name_sf")) %>%
+  left_join(indicadores_sexo, by = c("CCDD", "departamento"))
+
+# Centroides para etiquetas del mapa de sexo
+centroides_sexo <- peru_sexo_mapa %>%
+  st_centroid() %>%
+  mutate(
+    lon = st_coordinates(.)[, 1],
+    lat = st_coordinates(.)[, 2]
+  ) %>%
+  st_drop_geometry() %>%
+  select(name, departamento, Sexo, pct_participa, lon, lat) %>%
+  filter(!is.na(Sexo), !is.na(departamento))
+```
+
+```{r mapa3_genero, fig.width=16, fig.height=12}
+mapa3 <- ggplot(peru_sexo_mapa %>% filter(!is.na(Sexo))) +
+  geom_sf(aes(fill = pct_participa), color = "white", linewidth = 0.35) +
+  geom_text(
+    data          = centroides_sexo,
+    aes(x = lon, y = lat,
+        label = paste0(departamento, "\n", round(pct_participa, 1), "%")),
+    size          = 1.7,
+    color         = "white",
+    fontface      = "bold",
+    lineheight    = 0.8,
+    check_overlap = TRUE
+  ) +
+  facet_wrap(~Sexo, ncol = 2) +
+  scale_fill_viridis_c(
+    option   = "cividis",
+    name     = "% Participa",
+    labels   = function(x) paste0(x, "%"),
+    na.value = "grey80"
+  ) +
+  labs(
+    title    = "Participación Agropecuaria según Sexo",
+    subtitle = "Porcentaje por departamento (P1107 = 1) · ENA 2014–2024",
+    caption  = "Fuente: ENA – INEI / MIDAGRI"
+  ) +
+  theme_void(base_size = 12) +
+  theme(
+    strip.text       = element_text(face = "bold", size = 14, margin = margin(b = 8)),
+    plot.title       = element_text(face = "bold", hjust = 0.5, size = 15,
+                                    margin = margin(b = 6)),
+    plot.subtitle    = element_text(hjust = 0.5, color = "gray40",
+                                    margin = margin(b = 10)),
+    plot.caption     = element_text(hjust = 0, color = "gray50", size = 8),
+    legend.position  = "bottom",
+    legend.key.width = unit(2.5, "cm"),
+    legend.title     = element_text(size = 10, face = "bold"),
+    plot.background  = element_rect(fill = "white", color = NA),
+    plot.margin      = margin(10, 10, 10, 10)
+  )
+
+print(mapa3)
+ggsave("mapa3_genero_comparativo.png", mapa3, width = 16, height = 12, dpi = 200)
+cat("mapa3_genero_comparativo.png guardado\n")
+```
+
+
+# ============================================================
+#  RESUMEN FINAL
+# ============================================================
+
+```{r resumen_final}
+cat("
+╔══════════════════════════════════════════════════════════╗
+║         ANÁLISIS ESPACIAL ENA 2014–2024 COMPLETADO       ║
+╠══════════════════════════════════════════════════════════╣
+║  Datos originales   :", nrow(datos),      "filas              ║
+║  Datos limpios      :", nrow(ena_clean),  "filas              ║
+║  Departamentos      :", nrow(indicadores_dep), "                   ║
+╠══════════════════════════════════════════════════════════╣
+║  MAPAS GENERADOS:                                        ║
+║  ✔ mapa1_participacion.png                               ║
+║  ✔ apa2_decisiones.png                                  ║
+║  ✔ mapa3_genero_comparativo.png                         ║
+║  ✔ mapa4_brecha_genero.png                              ║
+╚══════════════════════════════════════════════════════════╝
+")
+```
+
+
+```{r}
+# ============================================================
+# MAPA 2 — PARTICIPACIÓN SEGÚN NIVEL EDUCATIVO
+# ============================================================
+
+indicadores_edu <- ena_clean %>%
+  mutate(Educacion = case_when(
+    P1105 == 1 ~ "Sin educación",
+    P1105 == 2 ~ "Primaria",
+    P1105 == 3 ~ "Secundaria",
+    P1105 == 4 ~ "Superior"
+  )) %>%
+  group_by(CCDD, Educacion) %>%
+  summarise(
+    pct_participa = mean(P1107 == 1, na.rm = TRUE) * 100,
+    .groups = "drop"
+  ) %>%
+  left_join(corresp_dep, by = "CCDD")
+
+peru_edu <- peru_dep %>%
+  left_join(corresp_dep, by = c("name" = "name_sf")) %>%
+  left_join(indicadores_edu, by = c("CCDD", "departamento"))
+
+centroides_edu <- peru_edu %>%
+  st_centroid() %>%
+  mutate(lon = st_coordinates(.)[,1],
+         lat = st_coordinates(.)[,2]) %>%
+  st_drop_geometry()
+
+mapa_edu <- ggplot(peru_edu %>% filter(!is.na(Educacion))) +
+  geom_sf(aes(fill = pct_participa), color = "white", linewidth = 0.4) +
+  geom_text(
+    data = centroides_edu,
+    aes(x = lon, y = lat,
+        label = paste0(departamento, "\n", round(pct_participa, 1), "%")),
+    size = 1.6,
+    color = "white",
+    fontface = "bold"
+  ) +
+  facet_wrap(~Educacion) +
+  scale_fill_viridis_c(option = "plasma", name = "% Participa") +
+  labs(
+    title = "Participación Agropecuaria según Nivel Educativo",
+    subtitle = "ENA 2014–2024",
+    caption = "Fuente: INEI / MIDAGRI"
+  ) +
+  theme_void()
+
+print(mapa_edu)
+```
+
+
+```{r}
+ena_clean %>%
+  mutate(
+    Educacion = factor(P1105)
+  ) %>%
+  group_by(Educacion) %>%
+  summarise(
+    decision = mean(P1107B == 1, na.rm = TRUE) * 100
+  ) %>%
+  ggplot(aes(Educacion, decision)) +
+  geom_line(group = 1) +
+  geom_point(size = 3) +
+  labs(
+    title = "¿Qué pasa si sube el nivel educativo?",
+    subtitle = "Educación vs toma de decisiones",
+    y = "% toma decisiones"
+  ) +
+  theme_minimal()
+```
+
+
+
+
+```{r}
+
+# RECREAR bien indicadores por departamento
+indicadores_dep <- ena_clean %>%
+  group_by(CCDD) %>%
+  summarise(
+    pct_decide = mean(P1107B == 1, na.rm = TRUE) * 100,
+    .groups = "drop"
+  ) %>%
+  left_join(tabla_dep, by = "CCDD")
+
+#  JOIN con mapa
+peru_mapa <- peru_dep %>%
+  left_join(corresp_dep, by = c("name" = "name_sf")) %>%
+  left_join(indicadores_dep, by = c("CCDD", "departamento"))
+
+#  centroides seguros
+centroides <- peru_mapa %>%
+  st_centroid() %>%
+  mutate(
+    lon = st_coordinates(.)[,1],
+    lat = st_coordinates(.)[,2]
+  ) %>%
+  st_drop_geometry()
+
+# ================= MAPA =================
+mapa2 <- ggplot(peru_mapa) +
+  geom_sf(aes(fill = pct_decide), color = "white", linewidth = 0.4) +
+
+  geom_text(
+    data = centroides,
+    aes(x = lon, y = lat,
+        label = paste0(departamento, "\n", round(pct_decide, 1), "%")),
+    size = 2.2,
+    color = "white",
+    fontface = "bold"
+  ) +
+
+  scale_fill_viridis_c(option = "plasma", name = "% Decisiones") +
+
+  labs(
+    title = "¿Qué pasa si las personas toman decisiones agropecuarias?",
+    subtitle = "Participación en decisiones (1107B) por departamento",
+    caption = "ENA 2014–2024"
+  ) +
+
+  theme_void() +
+  theme(
+    plot.title = element_text(face = "bold", hjust = 0.5)
+  )
+
+mapa2
+```
+
+```{r}
+
+indicadores_sexo <- ena_clean %>%
+  group_by(CCDD, P1103) %>%
+  summarise(
+    pct_decide = mean(P1107B == 1, na.rm = TRUE) * 100,
+    .groups = "drop"
+  ) %>%
+  mutate(Sexo = ifelse(P1103 == 1, "Hombre", "Mujer")) %>%
+  left_join(corresp_dep, by = "CCDD")
+
+peru_sexo <- peru_dep %>%
+  left_join(corresp_dep, by = c("name" = "name_sf")) %>%
+  left_join(indicadores_sexo, by = c("CCDD", "departamento"))
+
+centroides_sexo <- peru_sexo %>%
+  st_centroid() %>%
+  mutate(lon = st_coordinates(.)[,1],
+         lat = st_coordinates(.)[,2]) %>%
+  st_drop_geometry()
+
+ggplot(peru_sexo %>% filter(!is.na(Sexo))) +
+  geom_sf(aes(fill = pct_decide), color = "white") +
+  facet_wrap(~Sexo) +
+  geom_text(
+    data = centroides_sexo,
+    aes(lon, lat,
+        label = paste0(departamento, "\n", round(pct_decide,1), "%")),
+    size = 1.8,
+    color = "white"
+  ) +
+  scale_fill_viridis_c(option = "cividis") +
+  labs(
+    title = "¿Qué pasa si el sexo influye en la toma de decisiones?",
+    subtitle = "Decisión agropecuaria por sexo",
+    caption = "ENA 2014–2024"
+  ) +
+  theme_void()
+```
+
+```{r}
+
+educacion_map <- ena_clean %>%
+  group_by(CCDD, P1105) %>%
+  summarise(
+    pct_decide = mean(P1107B == 1, na.rm = TRUE) * 100,
+    .groups = "drop"
+  ) %>%
+  mutate(
+    educacion = case_when(
+      P1105 == 1 ~ "Sin nivel",
+      P1105 == 2 ~ "Inicial",
+      P1105 == 3 ~ "Primaria inc.",
+      P1105 == 4 ~ "Primaria comp.",
+      P1105 == 5 ~ "Sec. inc.",
+      P1105 == 6 ~ "Sec. comp.",
+      P1105 == 7 ~ "Sup no univ inc.",
+      P1105 == 8 ~ "Sup no univ comp.",
+      P1105 == 9 ~ "Sup univ inc.",
+      P1105 == 10 ~ "Sup univ comp."
+    )
+  ) %>%
+  left_join(corresp_dep, by = "CCDD")
+
+peru_edu <- peru_dep %>%
+  left_join(corresp_dep, by = c("name" = "name_sf")) %>%
+  left_join(educacion_map, by = c("CCDD", "departamento"))
+
+centroides_edu <- peru_edu %>%
+  st_centroid() %>%
+  mutate(lon = st_coordinates(.)[,1],
+         lat = st_coordinates(.)[,2]) %>%
+  st_drop_geometry()
+
+ggplot(peru_edu %>% filter(!is.na(educacion))) +
+  geom_sf(aes(fill = pct_decide), color = "white") +
+  facet_wrap(~educacion) +
+  geom_text(
+    data = centroides_edu,
+    aes(lon, lat,
+        label = paste0(departamento, "\n", round(pct_decide,1), "%")),
+    size = 1.6,
+    color = "white"
+  ) +
+  scale_fill_viridis_c(option = "plasma") +
+  labs(
+    title = "¿Qué pasa si la educación influye en decisiones agropecuarias?",
+    subtitle = "Relación educación vs toma de decisiones",
+    caption = "ENA 2014–2024"
+  ) +
+  theme_void()
+```
+
+
+```{r}
+library(dplyr)
+library(ggplot2)
+library(sf)
+library(viridis)
+
+edu_map <- indicador_edu_decision %>%
+  mutate(
+    educacion = case_when(
+      P1105 == 1 ~ "Sin nivel",
+      P1105 == 2 ~ "Inicial",
+      P1105 == 3 ~ "Primaria inc.",
+      P1105 == 4 ~ "Primaria comp.",
+      P1105 == 5 ~ "Sec. inc.",
+      P1105 == 6 ~ "Sec. comp.",
+      P1105 == 7 ~ "Sup no univ inc.",
+      P1105 == 8 ~ "Sup no univ comp.",
+      P1105 == 9 ~ "Sup univ inc.",
+      P1105 == 10 ~ "Sup univ comp."
+    )
+  ) %>%
+  left_join(corresp_dep, by = "CCDD")
+
+peru_edu <- peru_dep %>%
+  left_join(corresp_dep, by = c("name" = "name_sf")) %>%
+  left_join(edu_map, by = c("CCDD", "departamento"))
+
+centroides_edu <- peru_edu %>%
+  st_centroid() %>%
+  mutate(lon = st_coordinates(.)[,1],
+         lat = st_coordinates(.)[,2]) %>%
+  st_drop_geometry()
+
+ggplot(peru_edu %>% filter(!is.na(educacion))) +
+  geom_sf(aes(fill = pct_decide), color = "white", linewidth = 0.3) +
+  facet_wrap(~educacion) +
+
+  geom_text(
+    data = centroides_edu,
+    aes(lon, lat,
+        label = paste0(departamento, "\n", round(pct_decide,1), "%")),
+    size = 1.5,
+    color = "white",
+    fontface = "bold"
+  ) +
+
+  scale_fill_viridis_c(option = "plasma") +
+
+  labs(
+    title = "¿Qué pasa si la educación aumenta en el campo?",
+    subtitle = "Relación entre nivel educativo y toma de decisiones agropecuarias",
+    caption = "ENA 2014–2024"
+  ) +
+
+  theme_void()
+```
+
+
+
+
+
+
+
+
+```{r}
+ena_clean <- ena_clean %>%
+  mutate(
+    edu_estado = case_when(
+      P1105 %in% c(4, 6, 8, 10) ~ "Terminado",
+      TRUE ~ "No terminado"
+    ),
+    sexo = ifelse(P1103 == 1, "Hombre", "Mujer")
+  )
+```
+
+
+```{r}
+edu_sexo <- ena_clean %>%
+  group_by(sexo, edu_estado) %>%
+  summarise(n = n(), .groups = "drop") %>%
+  group_by(sexo) %>%
+  mutate(pct = round(n / sum(n) * 100, 1))
+```
+
+
+```{r}
+knitr::kable(edu_sexo,
+             caption = "Nivel educativo terminado vs no terminado por sexo")
+```
+
+
+```{r}
+library(ggplot2)
+
+ggplot(edu_sexo, aes(x = sexo, y = pct, fill = edu_estado)) +
+  geom_col(position = "fill") +
+  scale_y_continuous(labels = scales::percent) +
+  labs(
+    title = "Nivel educativo alcanzado por sexo",
+    subtitle = "Comparación: terminado vs no terminado",
+    x = "Sexo",
+    y = "% proporcional",
+    fill = "Educación"
+  ) +
+  theme_minimal()
+```
+
+
+
+```{r}
+edu_map <- ena_clean %>%
+  group_by(CCDD, sexo, edu_estado) %>%
+  summarise(n = n(), .groups = "drop") %>%
+  group_by(CCDD, sexo) %>%
+  mutate(pct = n / sum(n) * 100)
+
+edu_sf <- peru_dep %>%
+  left_join(corresp_dep, by = c("name" = "name_sf")) %>%
+  left_join(edu_map, by = "CCDD")
+```
+
+
+```{r}
+ggplot(edu_sf %>% filter(edu_estado == "Terminado")) +
+  geom_sf(aes(fill = pct), color = "white") +
+  facet_wrap(~sexo) +
+  scale_fill_viridis_c(option = "plasma") +
+  labs(
+    title = "¿Qué porcentaje de hombres y mujeres terminan educación?",
+    subtitle = "Solo niveles completos (primaria, secundaria, superior)",
+    fill = "% terminado"
+  ) +
+  theme_void()
+```
+
+
+
+```{r}
+ggplot(edu_sf %>% filter(edu_estado == "Terminado")) +
+  geom_sf(aes(fill = pct), color = "white") +
+  facet_wrap(~sexo) +
+  scale_fill_viridis_c(
+    option = "plasma",
+    labels = function(x) paste0(round(x, 1), "%")
+  ) +
+  labs(
+    title = "¿Qué porcentaje de hombres y mujeres terminan educación?",
+    subtitle = "Solo niveles completos (primaria, secundaria, superior)",
+    fill = "% terminado"
+  ) +
+  theme_void()
+```
+
+
+```{r}
+library(sf)
+library(dplyr)
+library(ggplot2)
+
+# Centroides del mapa
+centroides <- edu_sf %>%
+  st_centroid() %>%
+  mutate(
+    lon = st_coordinates(.)[,1],
+    lat = st_coordinates(.)[,2]
+  ) %>%
+  st_drop_geometry()
+
+# MAPA
+ggplot(edu_sf %>% filter(edu_estado == "Terminado")) +
+  geom_sf(aes(fill = pct), color = "white") +
+
+  geom_text(
+    data = centroides,
+    aes(x = lon, y = lat,
+        label = paste0(round(pct, 1), "%")),
+    size = 3,
+    color = "white",
+    fontface = "bold"
+  ) +
+
+  facet_wrap(~sexo) +
+
+  scale_fill_viridis_c(
+    option = "plasma",
+    labels = function(x) paste0(round(x, 1), "%")
+  ) +
+
+  labs(
+    title = "¿Qué porcentaje termina educación por departamento?",
+    subtitle = "Hombres vs Mujeres (solo educación terminada)",
+    fill = "% terminado"
+  ) +
+
+  theme_void()
+```
+
+
+#2. EDUCACIÓN → DECISIÓN (RELACIÓN REAL)
+# ¿Mayor educación = más toma de decisiones?
+
+```{r}
+edu_decision <- ena_clean %>%
+  group_by(P1105) %>%
+  summarise(pct_decide = mean(P1107B == 1)*100)
+```
+
+
+```{r}
+ggplot(edu_decision, aes(x = P1105, y = pct_decide)) +
+  geom_line() +
+  geom_point() +
+  labs(
+    title = "Relación educación vs toma de decisiones",
+    x = "Nivel educativo",
+    y = "% que decide"
+  ) +
+  theme_minimal()
+```
+
+#MAPA DE EDUCACIÓN PROMEDIO
+# ¿Qué departamentos tienen mayor nivel educativo?
+
+
+
+
+```{r}
+edu_prom <- ena_clean %>%
+  group_by(CCDD) %>%
+  summarise(edu_prom = mean(P1105, na.rm = TRUE))
+```
+
+```{r}
+mapa_edu <- peru_dep %>%
+  left_join(corresp_dep, by = c("name" = "name_sf")) %>%
+  left_join(edu_prom, by = "CCDD")
+
+ggplot(mapa_edu) +
+  geom_sf(aes(fill = edu_prom), color = "white") +
+  scale_fill_viridis_c() +
+  labs(title = "Nivel educativo promedio por departamento") +
+  theme_void()
+```
+
+
+```{r}
+# ============================================================
+# MAPA — NIVEL EDUCATIVO PROMEDIO POR DEPARTAMENTO
+# ============================================================
+
+# Centroides para etiquetas
+centroides_edu <- mapa_edu %>%
+  st_centroid() %>%
+  mutate(
+    lon = st_coordinates(.)[,1],
+    lat = st_coordinates(.)[,2]
+  ) %>%
+  st_drop_geometry()
+
+ggplot(mapa_edu) +
+  geom_sf(aes(fill = edu_prom), color = "white", linewidth = 0.4) +
+
+  # 🔥 ETIQUETAS DENTRO DEL MAPA
+  geom_text(
+    data = centroides_edu,
+    aes(
+      x = lon,
+      y = lat,
+      label = paste0(departamento, "\n", round(edu_prom,1))
+    ),
+    size = 2.2,
+    color = "white",
+    fontface = "bold",
+    lineheight = 0.85,
+    check_overlap = TRUE
+  ) +
+
+  scale_fill_viridis_c(
+    option = "cividis",
+    name = "Nivel educativo\n(promedio)",
+    na.value = "grey80"
+  ) +
+
+  labs(
+    title    = "Nivel Educativo Promedio por Departamento",
+    subtitle = "Escala: 1 = sin educación | 10 = superior universitaria completa",
+    caption  = "Fuente: ENA 2014–2024"
+  ) +
+
+  theme_void(base_size = 13) +
+  theme(
+    plot.title       = element_text(face = "bold", hjust = 0.5, size = 15),
+    plot.subtitle    = element_text(hjust = 0.5, color = "gray40"),
+    plot.caption     = element_text(size = 8, color = "gray50"),
+    legend.position  = "right",
+    legend.title     = element_text(face = "bold"),
+    plot.background  = element_rect(fill = "white", color = NA)
+  )
+```
+
+
+
+
+
+
+
+
+
