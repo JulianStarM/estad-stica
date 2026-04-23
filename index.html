@@ -7,98 +7,78 @@
   <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@300;400;700&display=swap" rel="stylesheet"/>
   <link rel="icon" href="https://res.cloudinary.com/dyrqu5qjz/image/upload/v1776689763/unap1_zr1qx5.ico" type="image/x-icon">
   <style>
-    :root {
-      --neon: #00ff41;
-      --neon-dim: #003b11;
-      --bg: #0a0a0a;
-      --text: #d0d0d0;
+    :root { --neon:#00ff41; --neon-dim:#003b11; --bg:#0a0a0a; --text:#d0d0d0; }
+    *{ box-sizing:border-box; margin:0; padding:0; scrollbar-width:none; }
+    *::-webkit-scrollbar{ display:none; }
+    body{ background:var(--bg); color:var(--text); font-family:'Source Code Pro',monospace; overflow:hidden; }
+
+    #matrixCanvas{ position:fixed; top:0; left:0; z-index:5; transition:opacity 1.5s ease,filter 1.5s ease; }
+    #matrixCanvas.authorized{ opacity:0.25; filter:blur(2px); }
+
+    #terminal-overlay{ position:fixed; inset:0; z-index:10000; display:flex; align-items:center; justify-content:center; background:rgba(10,10,10,0.4); }
+    .terminal-box{ width:90%; max-width:650px; padding:40px; border:1px solid var(--neon); background:rgba(0,5,0,0.95); box-shadow:0 0 50px rgba(0,255,65,0.2); }
+    #typing-text{ color:var(--neon); font-size:0.9rem; line-height:1.8; min-height:140px; white-space:pre-wrap; }
+    .loader-container{ width:100%; background:#001a00; height:6px; border:1px solid var(--neon-dim); margin-top:25px; }
+    .loader-bar{ width:0%; height:100%; background:var(--neon); box-shadow:0 0 10px var(--neon); }
+
+    #portafolio-wrapper{ display:none; opacity:0; transition:opacity 0.8s ease; position:relative; z-index:20; padding:40px 20px; max-width:1100px; margin:0 auto; height:100vh; overflow-y:auto; }
+
+    header{ border:1px solid var(--neon-dim); padding:35px; margin-bottom:0; background:rgba(0,0,0,0.85); backdrop-filter:blur(10px); border-left:5px solid var(--neon); }
+    .header-top{ display:flex; justify-content:space-between; align-items:center; margin-bottom:30px; }
+    .logo-img{ height:80px; object-fit:contain; }
+    .sys-title{ color:var(--neon); font-weight:bold; border-bottom:1px solid var(--neon-dim); padding-bottom:10px; margin-bottom:15px; font-size:1.3rem; letter-spacing:2px; }
+    .sys-grid{ display:grid; grid-template-columns:1fr 1fr; gap:12px; font-size:0.9rem; }
+    .hero-desc{ color:var(--neon); font-size:0.9rem; margin-top:20px; opacity:0.8; line-height:1.6; border-left:2px solid var(--neon); padding-left:15px; }
+
+    /* GLOBE */
+    #globe-section{ display:flex; justify-content:center; align-items:center; padding:28px 0 18px; background:transparent; }
+    #globeCanvas{ display:block; background:transparent; }
+
+    .filter-nav{ display:flex; flex-wrap:wrap; gap:12px; margin:20px 0 36px; }
+    .filter-btn{ background:transparent; border:1px solid var(--neon-dim); color:var(--neon-dim); padding:10px 20px; cursor:pointer; font-family:inherit; font-size:0.85rem; transition:0.3s; }
+    .filter-btn.active{ border-color:var(--neon); color:var(--neon); background:rgba(0,255,65,0.1); }
+
+    .tarea-card{ background:rgba(15,15,15,0.95); border:1px solid #222; padding:30px; margin-bottom:25px; display:grid; grid-template-columns:60px 1fr 240px; gap:25px; align-items:start; transition:0.3s; }
+    .tarea-card:hover{ border-color:var(--neon); background:rgba(0,40,0,0.8); }
+    .t-num{ font-size:2rem; font-weight:bold; color:var(--neon); opacity:0.3; line-height:1; }
+    .t-info strong{ color:var(--neon); display:block; margin-bottom:10px; font-size:1.1rem; }
+    .t-info p{ font-size:0.9rem; color:#999; line-height:1.6; margin-bottom:15px; }
+    .t-status-inline{ display:inline-flex; align-items:center; gap:8px; font-size:0.75rem; font-weight:bold; letter-spacing:1px; padding:4px 12px; border:1px solid; }
+    .status-ok{ border-color:var(--neon); color:var(--neon); background:rgba(0,255,65,0.05); }
+    .status-pending{ border-color:#444; color:#666; }
+    .t-actions{ display:flex; flex-direction:column; gap:12px; }
+    .btn-sys{ background:transparent; border:1px solid var(--neon); color:var(--neon); padding:12px; cursor:pointer; font-size:0.7rem; text-align:center; text-decoration:none; font-family:inherit; transition:0.3s; display:flex; align-items:center; justify-content:center; gap:10px; text-transform:uppercase; letter-spacing:1px; }
+    .btn-sys svg{ width:14px; height:14px; fill:currentColor; }
+    .btn-sys:hover{ background:var(--neon); color:#000; }
+    .btn-sys:disabled{ border-color:#333; color:#333; cursor:not-allowed; opacity:0.5; }
+
+    .overlay{ display:none; position:fixed; inset:0; background:rgba(0,0,0,0.97); z-index:50000; padding:25px; }
+    .overlay.open{ display:flex; align-items:center; justify-content:center; }
+    .modal{ background:#000; border:1px solid var(--neon); width:100%; max-width:1200px; height:94vh; display:flex; flex-direction:column; }
+    .m-bar-top{ background:var(--neon); color:#000; padding:12px 20px; display:flex; justify-content:space-between; font-weight:bold; }
+    .m-bar-sub{ background:#111; padding:12px; display:flex; gap:15px; border-bottom:1px solid #222; flex-wrap:wrap; }
+    .m-btn{ color:#fff; text-decoration:none; font-size:11px; border:1px solid #333; padding:8px 16px; background:#222; cursor:pointer; }
+    #mBody{ flex:1; background:#000; overflow:hidden; }
+    .pdf-frame{ width:100%; height:100%; border:none; display:block; }
+    .dark-pdf{ filter:invert(0.9) hue-rotate(180deg) contrast(1.1); }
+
+    /* RESPONSIVE */
+    @media(max-width:700px){
+      #portafolio-wrapper{ padding:18px 10px; }
+      header{ padding:18px 14px; }
+      .logo-img{ height:50px; }
+      .sys-title{ font-size:0.88rem; letter-spacing:1px; }
+      .sys-grid{ grid-template-columns:1fr; gap:7px; font-size:0.78rem; }
+      .tarea-card{ grid-template-columns:36px 1fr; gap:12px; padding:16px; }
+      .t-actions{ grid-column:1/-1; flex-direction:row; flex-wrap:wrap; }
+      .btn-sys{ flex:1; min-width:120px; font-size:0.62rem; padding:9px 5px; }
+      .t-num{ font-size:1.3rem; }
+      .filter-btn{ padding:7px 11px; font-size:0.72rem; }
     }
-
-    * { box-sizing: border-box; margin: 0; padding: 0; scrollbar-width: none; }
-    *::-webkit-scrollbar { display: none; }
-
-    body { background: var(--bg); color: var(--text); font-family: 'Source Code Pro', monospace; overflow: hidden; }
-
-    #matrixCanvas { position: fixed; top: 0; left: 0; z-index: 5; transition: opacity 1.5s ease, filter 1.5s ease; }
-    #matrixCanvas.authorized { opacity: 0.25; filter: blur(2px); }
-
-    #terminal-overlay {
-      position: fixed; inset: 0; z-index: 10000;
-      display: flex; align-items: center; justify-content: center;
-      background: rgba(10, 10, 10, 0.4);
+    @media(max-width:400px){
+      .logo-img{ height:38px; }
+      .sys-title{ font-size:0.75rem; }
     }
-    .terminal-box {
-      width: 90%; max-width: 650px; padding: 40px;
-      border: 1px solid var(--neon); background: rgba(0, 5, 0, 0.95);
-      box-shadow: 0 0 50px rgba(0, 255, 65, 0.2);
-    }
-    #typing-text { color: var(--neon); font-size: 0.9rem; line-height: 1.8; min-height: 140px; white-space: pre-wrap; }
-    .loader-container { width: 100%; background: #001a00; height: 6px; border: 1px solid var(--neon-dim); margin-top: 25px; }
-    .loader-bar { width: 0%; height: 100%; background: var(--neon); box-shadow: 0 0 10px var(--neon); }
-
-    #portafolio-wrapper { 
-      display: none; opacity: 0; transition: opacity 0.8s ease; 
-      position: relative; z-index: 20; padding: 40px 20px; 
-      max-width: 1100px; margin: 0 auto; height: 100vh; overflow-y: auto; 
-    }
-    
-    header { 
-      border: 1px solid var(--neon-dim); padding: 35px; margin-bottom: 40px; 
-      background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(10px); 
-      border-left: 5px solid var(--neon);
-    }
-    
-    .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
-    .logo-img { height: 80px; object-fit: contain; }
-
-    .sys-title { color: var(--neon); font-weight: bold; border-bottom: 1px solid var(--neon-dim); padding-bottom: 10px; margin-bottom: 15px; font-size: 1.3rem; letter-spacing: 2px; }
-    .sys-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; font-size: 0.9rem; }
-    .hero-desc { color: var(--neon); font-size: 0.9rem; margin-top: 20px; opacity: 0.8; line-height: 1.6; border-left: 2px solid var(--neon); padding-left: 15px; }
-
-    .filter-nav { display: flex; gap: 15px; margin: 30px 0 40px; }
-    .filter-btn { background: transparent; border: 1px solid var(--neon-dim); color: var(--neon-dim); padding: 10px 20px; cursor: pointer; font-family: inherit; font-size: 0.85rem; transition: 0.3s; }
-    .filter-btn.active { border-color: var(--neon); color: var(--neon); background: rgba(0,255,65,0.1); }
-
-    .tarea-card { 
-      background: rgba(15, 15, 15, 0.95); border: 1px solid #222; padding: 30px; 
-      margin-bottom: 25px; display: grid; grid-template-columns: 60px 1fr 240px; 
-      gap: 25px; align-items: start; transition: 0.3s;
-    }
-    .tarea-card:hover { border-color: var(--neon); background: rgba(0, 40, 0, 0.8); }
-    
-    .t-num { font-size: 2rem; font-weight: bold; color: var(--neon); opacity: 0.3; line-height: 1; }
-    .t-info strong { color: var(--neon); display: block; margin-bottom: 10px; font-size: 1.1rem; }
-    .t-info p { font-size: 0.9rem; color: #999; line-height: 1.6; margin-bottom: 15px; }
-    
-    .t-status-inline { 
-        display: inline-flex; align-items: center; gap: 8px; font-size: 0.75rem; 
-        font-weight: bold; letter-spacing: 1px; padding: 4px 12px; border: 1px solid;
-    }
-    .status-ok { border-color: var(--neon); color: var(--neon); background: rgba(0,255,65,0.05); }
-    .status-pending { border-color: #444; color: #666; }
-
-    .t-actions { display: flex; flex-direction: column; gap: 12px; }
-    .btn-sys { 
-      background: transparent; border: 1px solid var(--neon); color: var(--neon); 
-      padding: 12px; cursor: pointer; font-size: 0.7rem; text-align: center;
-      text-decoration: none; font-family: inherit; transition: 0.3s;
-      display: flex; align-items: center; justify-content: center; gap: 10px;
-      text-transform: uppercase; letter-spacing: 1px;
-    }
-    .btn-sys svg { width: 14px; height: 14px; fill: currentColor; }
-    .btn-sys:hover { background: var(--neon); color: #000; }
-    .btn-sys:disabled { border-color: #333; color: #333; cursor: not-allowed; opacity: 0.5; }
-
-    .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.97); z-index: 50000; padding: 25px; }
-    .overlay.open { display: flex; align-items: center; justify-content: center; }
-    .modal { background: #000; border: 1px solid var(--neon); width: 100%; max-width: 1200px; height: 94vh; display: flex; flex-direction: column; }
-    .m-bar-top { background: var(--neon); color: #000; padding: 12px 20px; display: flex; justify-content: space-between; font-weight: bold; }
-    .m-bar-sub { background: #111; padding: 12px; display: flex; gap: 15px; border-bottom: 1px solid #222; }
-    .m-btn { color: #fff; text-decoration: none; font-size: 11px; border: 1px solid #333; padding: 8px 16px; background: #222; cursor: pointer; }
-    
-    #mBody { flex:1; background:#000; overflow: hidden; }
-    .pdf-frame { width: 100%; height: 100%; border: none; display: block; }
-    .dark-pdf { filter: invert(0.9) hue-rotate(180deg) contrast(1.1); }
   </style>
 </head>
 <body>
@@ -108,9 +88,7 @@
 <div id="terminal-overlay">
   <div class="terminal-box">
     <div id="typing-text"></div>
-    <div class="loader-container">
-      <div class="loader-bar" id="bar"></div>
-    </div>
+    <div class="loader-container"><div class="loader-bar" id="bar"></div></div>
   </div>
 </div>
 
@@ -132,10 +110,15 @@
     <p class="hero-desc">> Compendio de análisis avanzado de procesos puntuales, autocorrelación y geoestadística.</p>
   </header>
 
+  <!-- GLOBO LIBRE: sin caja, sin fondo, directo sobre la página -->
+  <div id="globe-section">
+    <canvas id="globeCanvas"></canvas>
+  </div>
+
   <nav class="filter-nav">
-    <button class="filter-btn active" onclick="filterUnit('all', this)">[ TODO ]</button>
-    <button class="filter-btn" onclick="filterUnit('u1', this)">[ UNIDAD I ]</button>
-    <button class="filter-btn" onclick="filterUnit('u2', this)">[ UNIDAD II ]</button>
+    <button class="filter-btn active" onclick="filterUnit('all',this)">[ TODO ]</button>
+    <button class="filter-btn" onclick="filterUnit('u1',this)">[ UNIDAD I ]</button>
+    <button class="filter-btn" onclick="filterUnit('u2',this)">[ UNIDAD II ]</button>
   </nav>
 
   <div id="tasks-container"></div>
@@ -145,180 +128,235 @@
   <div class="modal">
     <div class="m-bar-top"><span id="mTitulo">VISOR_DE_SISTEMA</span><span onclick="cerrar()" style="cursor:pointer">✕</span></div>
     <div class="m-bar-sub">
-        <a id="btnGH" class="m-btn" href="#" target="_blank">VER EN GITHUB</a>
-        <a id="btnDL" class="m-btn" href="#" target="_blank">DESCARGAR</a>
-        <button class="m-btn" onclick="toggleVision()">MODO VISIÓN</button>
-        <button onclick="cerrar()" class="m-btn" style="margin-left:auto;">CERRAR</button>
+      <a id="btnGH" class="m-btn" href="#" target="_blank">VER EN GITHUB</a>
+      <a id="btnDL" class="m-btn" href="#" target="_blank">DESCARGAR</a>
+      <button class="m-btn" onclick="toggleVision()">MODO VISIÓN</button>
+      <button onclick="cerrar()" class="m-btn" style="margin-left:auto;">CERRAR</button>
     </div>
     <div id="mBody"></div>
   </div>
 </div>
 
 <script>
-const GH_USER = "JulianStarM"; 
-const GH_REPO = "estad-stica"; 
-const GH_BRANCH = "main";
+const GH_USER="JulianStarM", GH_REPO="estad-stica", GH_BRANCH="main";
 
-const UNIDADES = [
-  { id: 'u1', label: 'Unidad I: Fundamentos del Análisis Espacial', tareas: [
-    { 
-      num: 1, 
-      titulo: "Tarea 1 – Ubicación Espacial", 
-      desc: "Lectura de datos geográficos, sistemas de coordenadas y visualización inicial con R.", 
-      pdf: "pdf/TAREA1.pdf", 
-      codigo: "codigo/ENA_Analisis_Espacial_Completo.Rmd", 
-      codigoTipo: "r" 
+const UNIDADES=[
+  {id:'u1',label:'Unidad I: Fundamentos del Análisis Espacial',tareas:[
+    {num:1,titulo:"Tarea 1 – Vectores & Shapes",desc:"Conceptos básicos de datos espaciales vectoriales y ráster, y su uso en la representación geográfica.",pdf:'MONOGRAFIA_FRED_UNIDA.pdf',codigo:null,codigoTipo:"r"
     },
+
+    {num:2,titulo:"Tarea 2 – Ubicación Espacial",desc:"Lectura de datos geográficos, sistemas de coordenadas y visualización inicial con R.",pdf:"pdf/TAREA2.pdf",codigo:"codigo/ENA_Analisis_Espacial_Completo.Rmd",codigoTipo:"r"},
     { 
-      num: 2, 
-      titulo: "Tarea 2 – .....", 
-      desc: "....", 
-      pdf: null, 
-      codigo: null, 
-      codigoTipo: "r" 
+      num: 3,
+      titulo: "Tarea 3 – Pipelines",
+      desc: "Diseño de pipelines de datos en R y desarrollo de aplicaciones interactivas con Shiny para la generación y exploración de gráficos dinámicos.",
+      pdf: "pdf/Pipelines.pdf",
+      codigo:"codigo/app.R",
+      link: "https://appjulian.shinyapps.io/APLICATIVO_VACAS/", 
+      codigoTipo: "r"
     },
-    { 
-      num: 3, 
-      titulo: "Tarea 3 –........", 
-      desc: "....", 
-      pdf: null, 
-      codigo: null, 
-      codigoTipo: "r" 
-    },
-    { 
-      num: 4, 
-      titulo: "Tarea 4 –...", 
-      desc: "....   .", 
-      pdf: null, 
-      codigo: null, 
-      codigoTipo: "python" 
-    }
+    {num:4,titulo:"Tarea 4 –........",desc:"....",pdf:null,codigo:null,codigoTipo:"r"},
+    {num:5,titulo:"Tarea 5 –...",desc:"....   .",pdf:null,codigo:null,codigoTipo:"python"}
   ]},
-  { id: 'u2', label: 'Unidad II: Geoestadística y Modelado', tareas: [
-    { 
-      num: 5, 
-      titulo: "Tarea 5 –...", 
-      desc: "...", 
-      pdf: null, 
-      codigo: null, 
-      codigoTipo: "r" 
-    },
-    { 
-      num: 6, 
-      titulo: "Tarea 6 – ...", 
-      desc: "...", 
-      pdf: null, 
-      codigo: null, 
-      codigoTipo: "r" 
-    }
+  {id:'u2',label:'Unidad II: Geoestadística y Modelado',tareas:[
+    {num:5,titulo:"Tarea 5 –...",desc:"...",pdf:null,codigo:null,codigoTipo:"r"},
+    {num:6,titulo:"Tarea 6 – ...",desc:"...",pdf:null,codigo:null,codigoTipo:"r"}
   ]}
 ];
 
-const ICON_PDF = `<svg viewBox="0 0 24 24"><path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/></svg>`;
-const ICON_CODE = `<svg viewBox="0 0 24 24"><path d="M14.6,16.6L19.2,12L14.6,7.4L16,6L22,12L16,18L14.6,16.6M9.4,16.6L4.8,12L9.4,7.4L8,6L2,12L8,18L9.4,16.6Z"/></svg>`;
+const ICON_PDF=`<svg viewBox="0 0 24 24"><path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/></svg>`;
+const ICON_CODE=`<svg viewBox="0 0 24 24"><path d="M14.6,16.6L19.2,12L14.6,7.4L16,6L22,12L16,18L14.6,16.6M9.4,16.6L4.8,12L9.4,7.4L8,6L2,12L8,18L9.4,16.6Z"/></svg>`;
 
-// Matrix Engine
-const canvas = document.getElementById('matrixCanvas');
-const ctx = canvas.getContext('2d');
-canvas.width = window.innerWidth; canvas.height = window.innerHeight;
-const letters = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZﾊﾐﾋｰｳｼﾅﾓﾆｻﾜﾂｵﾘｱﾎﾃﾏｹﾒｴｶｷﾑﾕﾗｾﾈｽﾀﾇﾍ";
-const drops = Array(Math.floor(canvas.width/16)).fill(1);
-function drawMatrix() {
-  ctx.fillStyle = 'rgba(0, 0, 0, 0.05)'; ctx.fillRect(0, 0, canvas.width, canvas.height);
-  ctx.fillStyle = '#0F0'; ctx.font = '16px monospace';
-  drops.forEach((y, i) => {
-    ctx.fillText(letters[Math.floor(Math.random() * letters.length)], i * 16, y * 16);
-    if (y * 16 > canvas.height && Math.random() > 0.975) drops[i] = 0;
-    drops[i]++;
-  });
+// Matrix
+const canvas=document.getElementById('matrixCanvas');
+const ctx=canvas.getContext('2d');
+canvas.width=window.innerWidth; canvas.height=window.innerHeight;
+const letters="01ABCDEFGHIJKLMNOPQRSTUVWXYZﾊﾐﾋｰｳｼﾅﾓﾆｻﾜﾂｵﾘｱﾎﾃﾏｹﾒｴｶｷﾑﾕﾗｾﾈｽﾀﾇﾍ";
+const drops=Array(Math.floor(canvas.width/16)).fill(1);
+function drawMatrix(){
+  ctx.fillStyle='rgba(0,0,0,0.05)'; ctx.fillRect(0,0,canvas.width,canvas.height);
+  ctx.fillStyle='#0F0'; ctx.font='16px monospace';
+  drops.forEach((y,i)=>{ ctx.fillText(letters[Math.floor(Math.random()*letters.length)],i*16,y*16); if(y*16>canvas.height&&Math.random()>0.975) drops[i]=0; drops[i]++; });
 }
-setInterval(drawMatrix, 50);
+setInterval(drawMatrix,50);
 
-// Hackeo Sincronizado
-const messages = ["> INITIALIZING_SECURE_CONNECTION...", "> LOADING_PORTFOLIO_DATA_NODES...", "> BYPASSING_ACADEMIC_FIREWALL...", "> ACCESS_LEVEL: ADMINISTRATOR_J_JULIAN", "> STATUS: AUTHORIZED."];
-let line = 0, char = 0, progress = 0;
-function startLoading() {
-    const textInt = setInterval(() => {
-        if (line < messages.length) {
-            if (char < messages[line].length) {
-                document.getElementById('typing-text').innerHTML += messages[line][char];
-                char++;
-            } else { document.getElementById('typing-text').innerHTML += "<br>"; char = 0; line++; }
-        } else { clearInterval(textInt); }
-    }, 25);
-    const barInt = setInterval(() => {
-        progress += 0.5; document.getElementById('bar').style.width = progress + "%";
-        if (progress >= 100 && line >= messages.length) { clearInterval(barInt); setTimeout(accessGranted, 500); }
-    }, 20);
+// Boot
+const messages=["> INITIALIZING_SECURE_CONNECTION...","> LOADING_PORTFOLIO_DATA_NODES...","> BYPASSING_ACADEMIC_FIREWALL...","> ACCESS_LEVEL: ADMINISTRATOR_J_JULIAN","> STATUS: AUTHORIZED."];
+let line=0,char=0,progress=0;
+function startLoading(){
+  const textInt=setInterval(()=>{
+    if(line<messages.length){ if(char<messages[line].length){document.getElementById('typing-text').innerHTML+=messages[line][char];char++;}else{document.getElementById('typing-text').innerHTML+="<br>";char=0;line++;} }
+    else clearInterval(textInt);
+  },25);
+  const barInt=setInterval(()=>{
+    progress+=0.5; document.getElementById('bar').style.width=progress+"%";
+    if(progress>=100&&line>=messages.length){clearInterval(barInt);setTimeout(accessGranted,500);}
+  },20);
 }
 startLoading();
 
-function accessGranted() {
-  document.getElementById('terminal-overlay').style.display = 'none';
+function accessGranted(){
+  document.getElementById('btnGH').style.display = 'none'; // Oculta el botón de GitHub si no hay tareas con PDF -----------------
+  document.getElementById('terminal-overlay').style.display='none';
   document.getElementById('matrixCanvas').classList.add('authorized');
-  const w = document.getElementById('portafolio-wrapper');
-  w.style.display = 'block'; setTimeout(() => w.style.opacity = 1, 50);
+  const w=document.getElementById('portafolio-wrapper');
+  w.style.display='block'; setTimeout(()=>w.style.opacity=1,50);
   renderTasks('all');
+  initGlobe();
 }
 
-function renderTasks(filter) {
-  const container = document.getElementById('tasks-container');
-  container.innerHTML = '';
-  UNIDADES.forEach(u => {
-    if(filter === 'all' || filter === u.id) {
-      container.innerHTML += `<div style="color:var(--neon); margin:40px 0 25px; font-weight:bold; letter-spacing: 2px;">[ ${u.label.toUpperCase()} ]</div>`;
-      u.tareas.forEach(t => {
-        const isSent = t.pdf !== null;
-        container.innerHTML += `
-          <div class="tarea-card">
-            <div class="t-num">${t.num}</div>
-            <div class="t-info">
-                <strong>${t.titulo.toUpperCase()}</strong>
-                <p>${t.desc}</p>
-                <div class="t-status-inline ${isSent ? 'status-ok' : 'status-pending'}">
-                    ${isSent ? 'STATUS: ENVIADO' : 'STATUS: PENDIENTE'}
-                </div>
-            </div>
-            <div class="t-actions">
-              <button class="btn-sys" ${t.pdf ? `onclick="abrir('PDF','${t.titulo}','${t.pdf}')"` : 'disabled'}>
-                ${ICON_PDF} ${t.pdf ? 'Ver Informe' : 'PRÓXIMAMENTE'}
-              </button>
-              <button class="btn-sys" ${t.codigo ? `onclick="abrir('CODE','${t.titulo}','${t.codigo}')"` : 'disabled'}>
-                ${ICON_CODE} ${t.codigo ? 'Ver Código ' + t.codigoTipo.toUpperCase() : 'PRÓXIMAMENTE'}
-              </button>
-            </div>
-          </div>`;
+function renderTasks(filter){
+  const c=document.getElementById('tasks-container'); c.innerHTML='';
+  UNIDADES.forEach(u=>{
+    if(filter==='all'||filter===u.id){
+      c.innerHTML+=`<div style="color:var(--neon);margin:40px 0 25px;font-weight:bold;letter-spacing:2px;">[ ${u.label.toUpperCase()} ]</div>`;
+      u.tareas.forEach(t=>{
+        const ok=t.pdf!==null;
+        c.innerHTML+=`<div class="tarea-card">
+          <div class="t-num">${t.num}</div>
+          <div class="t-info"><strong>${t.titulo.toUpperCase()}</strong><p>${t.desc}</p>
+            <div class="t-status-inline ${ok?'status-ok':'status-pending'}">${ok?'STATUS: ENVIADO':'STATUS: PENDIENTE'}</div>
+          </div>
+          <div class="t-actions">
+            <button class="btn-sys" ${t.pdf?`onclick="abrir('PDF','${t.titulo}','${t.pdf}')"` :'disabled'}>${ICON_PDF} ${t.pdf?'Ver PDF':'PRÓXIMAMENTE'}</button>
+            <button class="btn-sys" ${t.codigo?`onclick="abrir('CODE','${t.titulo}','${t.codigo}')"` :'disabled'}>${ICON_CODE} ${t.codigo?'Ver Código '+t.codigoTipo.toUpperCase():'PRÓXIMAMENTE'}</button>
+            <button class="btn-sys" ${t.link?`onclick="window.open('${t.link}','_blank')"` :'disabled'}>${t.link?'Abrir Enlace':'PRÓXIMAMENTE'}</button>
+          </div></div>`;
       });
     }
   });
 }
 
-function filterUnit(id, btn) {
-  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  renderTasks(id);
-}
+function filterUnit(id,btn){ document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); renderTasks(id); }
 
-function abrir(tipo, titulo, ruta) {
-  const raw = `https://raw.githubusercontent.com/${GH_USER}/${GH_REPO}/${GH_BRANCH}/${ruta}`;
-  const body = document.getElementById('mBody');
-  document.getElementById('mTitulo').innerText = titulo.toUpperCase();
-  document.getElementById('btnGH').href = `https://github.com/${GH_USER}/${GH_REPO}/blob/${GH_BRANCH}/${ruta}`;
-  document.getElementById('btnDL').href = raw;
-  if(tipo === 'PDF') {
-    const pdfUrl = `https://mozilla.github.io/pdf.js/web/viewer.html?file=${encodeURIComponent(raw)}`;
-    body.innerHTML = `<iframe id="pdfFrame" class="pdf-frame dark-pdf" src="${pdfUrl}"></iframe>`;
+function abrir(tipo,titulo,ruta){
+  const raw=`https://raw.githubusercontent.com/${GH_USER}/${GH_REPO}/${GH_BRANCH}/${ruta}`;
+  document.getElementById('mTitulo').innerText=titulo.toUpperCase();
+  document.getElementById('btnGH').href=`https://github.com/${GH_USER}/${GH_REPO}/blob/${GH_BRANCH}/${ruta}`;
+  document.getElementById('btnDL').href=raw;
+  const body=document.getElementById('mBody');
+  if(tipo==='PDF'){
+    body.innerHTML=`<iframe id="pdfFrame" class="pdf-frame dark-pdf" src="https://mozilla.github.io/pdf.js/web/viewer.html?file=${encodeURIComponent(raw)}"></iframe>`;
   } else {
-    fetch(raw).then(r => r.text()).then(t => {
-      body.innerHTML = `<pre style="padding:30px; color:var(--neon); font-size:13px; overflow:auto; height:100%">${t.replace(/</g, '&lt;')}</pre>`;
-    });
+    fetch(raw).then(r=>r.text()).then(t=>{ body.innerHTML=`<pre style="padding:30px;color:var(--neon);font-size:13px;overflow:auto;height:100%">${t.replace(/</g,'&lt;')}</pre>`; });
   }
   document.getElementById('overlay').classList.add('open');
 }
 
-function toggleVision() { const f = document.getElementById('pdfFrame'); if(f) f.classList.toggle('dark-pdf'); }
-function cerrar() { document.getElementById('overlay').classList.remove('open'); }
-window.addEventListener('resize', () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; });
+function toggleVision(){ const f=document.getElementById('pdfFrame'); if(f) f.classList.toggle('dark-pdf'); }
+function cerrar(){ document.getElementById('overlay').classList.remove('open'); }
+
+// ── GLOBE ────────────────────────────────────────────────────────────────────
+function initGlobe(){
+  const gc=document.getElementById('globeCanvas');
+  const gctx=gc.getContext('2d');
+  let GR,GW,GH,gcx,gcy;
+  let gAngle=0;
+
+  function resize(){
+    const vw=window.innerWidth;
+    const size=vw<=380?148:vw<=600?180:220;
+    GR=Math.floor(size/2)-8; GW=size; GH=size;
+    gc.width=GW; gc.height=GH; gcx=GW/2; gcy=GH/2;
+  }
+  resize();
+  window._resizeGlobe=resize;
+
+  const C=[
+    [[-168,72],[-140,70],[-124,49],[-117,32],[-97,19],[-87,16],[-83,10],[-77,8],[-76,18],[-80,25],[-80,31],[-75,35],[-70,47],[-66,44],[-60,47],[-64,44],[-66,60],[-78,73],[-95,75],[-120,74],[-140,72],[-155,60],[-168,65]],
+    [[-80,11],[-77,8],[-76,1],[-70,-2],[-50,4],[-50,-1],[-35,-6],[-35,-9],[-38,-13],[-40,-20],[-43,-23],[-51,-30],[-53,-33],[-58,-38],[-62,-38],[-65,-55],[-68,-55],[-72,-50],[-75,-42],[-72,-30],[-70,-18],[-75,-8],[-78,0],[-80,6]],
+    [[-9,37],[0,37],[3,43],[5,43],[4,51],[-2,51],[-5,48],[-10,44],[-9,39],[0,37],[5,43],[10,44],[14,46],[18,40],[16,37],[12,38],[16,42],[18,45],[20,46],[22,41],[24,38],[26,41],[28,43],[30,46],[28,57],[24,60],[28,65],[30,70],[25,71],[22,65],[20,58],[14,60],[10,58],[5,58],[0,51],[-4,51],[-6,44]],
+    [[-6,35],[5,37],[12,37],[25,37],[32,31],[37,22],[43,12],[51,12],[44,8],[42,2],[40,-2],[40,-10],[35,-18],[32,-28],[28,-35],[18,-35],[16,-30],[12,-18],[10,-6],[8,4],[2,6],[-5,5],[-15,10],[-17,15],[-16,20],[-13,28],[-6,35]],
+    [[26,42],[36,42],[36,37],[40,36],[36,32],[37,27],[43,22],[57,22],[57,12],[44,8],[51,12],[58,22],[68,24],[72,20],[80,8],[80,14],[90,22],[98,18],[104,1],[108,3],[110,5],[120,22],[122,32],[130,32],[130,42],[135,34],[138,34],[141,46],[140,53],[136,55],[132,48],[130,43],[128,50],[130,58],[132,62],[140,68],[145,45],[150,46],[153,50],[160,60],[168,68],[180,68],[180,72],[170,72],[158,73],[140,74],[130,73],[110,74],[100,76],[80,74],[70,74],[60,72],[50,68],[45,58],[38,56],[30,60],[28,65],[20,70],[30,80],[60,82],[100,78],[140,74],[60,70],[58,68],[64,62],[60,58],[52,58],[50,68],[45,58],[38,56],[30,52],[26,42]],
+    [[114,-22],[122,-18],[128,-14],[132,-12],[138,-13],[142,-10],[145,-15],[148,-20],[152,-24],[152,-29],[148,-38],[144,-38],[138,-35],[132,-34],[122,-34],[115,-34],[114,-22]],
+    [[-22,84],[-18,77],[-20,72],[-30,68],[-42,65],[-52,66],[-54,70],[-52,76],[-44,82],[-30,84],[-22,84]],
+  ];
+
+  function ll3d(lat,lon,r){const phi=(90-lat)*Math.PI/180,theta=(lon+180)*Math.PI/180;return{x:-r*Math.sin(phi)*Math.cos(theta),y:r*Math.cos(phi),z:r*Math.sin(phi)*Math.sin(theta)};}
+  function rotY(p,a){const c=Math.cos(a),s=Math.sin(a);return{x:p.x*c-p.z*s,y:p.y,z:p.x*s+p.z*c};}
+
+  function isLand(lat,lon){
+    for(const pts of C){let inside=false;for(let i=0,j=pts.length-1;i<pts.length;j=i++){const[xi,yi]=pts[i],[xj,yj]=pts[j];if(((yi>lat)!==(yj>lat))&&(lon<(xj-xi)*(lat-yi)/(yj-yi)+xi))inside=!inside;}if(inside)return true;}return false;
+  }
+
+  const GRID=[];
+  for(let lat=-85;lat<=85;lat+=4.5)for(let lon=-180;lon<180;lon+=5)GRID.push({lat,lon,land:isLand(lat,lon),br:0.65+Math.random()*0.35});
+
+  const LINES=[];
+  for(let lat=-75;lat<=75;lat+=15)LINES.push({type:'lat',val:lat});
+  for(let lon=-165;lon<180;lon+=15)LINES.push({type:'lon',val:lon});
+
+  function frame(){
+    gctx.clearRect(0,0,GW,GH);
+
+    // clip circular — fondo transparente, sin ninguna caja
+    gctx.save();
+    gctx.beginPath();
+    gctx.arc(gcx,gcy,GR,0,Math.PI*2);
+    gctx.clip();
+
+    // cuadrícula
+    for(const g of LINES){
+      gctx.beginPath();let first=true;
+      if(g.type==='lat'){for(let lon=-180;lon<=180;lon+=4){const pr=rotY(ll3d(g.val,lon,GR),gAngle);if(pr.z<-5){first=true;continue;}first?gctx.moveTo(gcx+pr.x,gcy-pr.y):gctx.lineTo(gcx+pr.x,gcy-pr.y);first=false;}}
+      else{for(let lat=-90;lat<=90;lat+=4){const pr=rotY(ll3d(lat,g.val,GR),gAngle);if(pr.z<-5){first=true;continue;}first?gctx.moveTo(gcx+pr.x,gcy-pr.y):gctx.lineTo(gcx+pr.x,gcy-pr.y);first=false;}}
+      gctx.strokeStyle='rgba(0,255,65,0.15)';gctx.lineWidth=0.4;gctx.stroke();
+    }
+
+    // continentes
+    for(const pts of C){
+      const m=pts.map(([lon,lat])=>{const pr=rotY(ll3d(lat,lon,GR+0.5),gAngle);return{sx:gcx+pr.x,sy:gcy-pr.y,vis:pr.z>0};});
+      let i=0;
+      while(i<m.length){
+        if(!m[i].vis){i++;continue;}
+        let j=i;while(j<m.length&&m[j].vis)j++;
+        if(j-i<2){i=j+1;continue;}
+        const seg=m.slice(i,j);
+        gctx.beginPath();gctx.moveTo(seg[0].sx,seg[0].sy);
+        for(let k=1;k<seg.length;k++)gctx.lineTo(seg[k].sx,seg[k].sy);
+        if(j===m.length&&m[0].vis)gctx.closePath();
+        gctx.fillStyle='rgba(0,20,0,0.88)';gctx.fill();
+        gctx.strokeStyle='rgba(0,255,65,0.72)';gctx.lineWidth=0.6;gctx.stroke();
+        i=j;
+      }
+    }
+
+    // ceros sobre países
+    const fs=Math.max(5,Math.round(GR*0.075));
+    gctx.font=`bold ${fs}px Courier New`;
+    for(const pt of GRID){
+      if(!pt.land)continue;
+      const pr=rotY(ll3d(pt.lat,pt.lon,GR+1),gAngle);
+      if(pr.z<0)continue;
+      const d=(pr.z+GR)/(2*GR);
+      gctx.globalAlpha=0.45+d*pt.br*0.55;
+      gctx.fillStyle='#00ff41';
+      gctx.fillText('0',gcx+pr.x-fs*0.35,gcy-pr.y+fs*0.38);
+    }
+    gctx.globalAlpha=1;
+    gctx.restore();
+
+    // halo exterior
+    const rim=gctx.createRadialGradient(gcx,gcy,GR*0.76,gcx,gcy,GR);
+    rim.addColorStop(0,'rgba(0,255,65,0)');
+    rim.addColorStop(1,'rgba(0,255,65,0.22)');
+    gctx.beginPath();gctx.arc(gcx,gcy,GR,0,Math.PI*2);
+    gctx.fillStyle=rim;gctx.fill();
+
+    // borde
+    gctx.beginPath();gctx.arc(gcx,gcy,GR,0,Math.PI*2);
+    gctx.strokeStyle='rgba(0,255,65,0.55)';gctx.lineWidth=1.5;gctx.stroke();
+
+    gAngle+=0.004;
+    requestAnimationFrame(frame);
+  }
+  frame();
+}
+
+window.addEventListener('resize',()=>{
+  canvas.width=window.innerWidth;canvas.height=window.innerHeight;
+  if(window._resizeGlobe) window._resizeGlobe();
+});
 </script>
 </body>
 </html>
